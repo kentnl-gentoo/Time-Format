@@ -63,3 +63,9 @@ Revision history for Perl extension Time::Format.
         - Test suite now tests perl-only routines separately from
           XS-enabled routines.
         - Further delay compilation of time_format until needed.
+
+1.00  2004 September 24
+	- Increase version to 1.00.
+	- More flexible version-compatibility checking with
+	  Time::Format_XS
+        - Fix some warning messages (and some typos) in tests.

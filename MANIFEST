@@ -25,3 +25,4 @@ t/xs_funcs.t
 t/xs_locale.t
 t/xs_quot.t
 t/xs_time.t
+META.yml                                 Module meta-data (added by MakeMaker)

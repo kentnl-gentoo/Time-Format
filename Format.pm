@@ -8,14 +8,15 @@ Time::Format - Easy-to-use date/time formatting.
 
 =head1 VERSION
 
-This documentation describes version 0.13 of Time::Format.pm, August 1, 2003.
+This documentation describes version 1.00 of Time::Format.pm, September 24, 2004.
 
 =cut
 
 use strict;
 package Time::Format;
 
-$Time::Format::VERSION = '0.13';
+$Time::Format::VERSION  = '1.00';
+%Time::Format::XSCOMPAT = map {$_ => 1} qw/0.13 1.00/;   # Compatible with these versions of Time::Format_XS.
 
 my $load_perlonly = 0;
 
@@ -32,10 +33,11 @@ if (!$load_perlonly)
     }
     else
     {
-        if ($Time::Format_XS::VERSION  ne  $Time::Format::VERSION)
+        unless ($Time::Format::XSCOMPAT{$Time::Format_XS::VERSION}     # We know we're compatible with them
+            or  $Time::Format_XS::PLCOMPAT{$Time::Format::VERSION})    # they know they're compatible with us
         {
             warn "Time::Format_XS version ($Time::Format_XS::VERSION) " .
-                 "does not match Time::Format version ($Time::Format::VERSION).\n" .
+                 "is not compatible with Time::Format version ($Time::Format::VERSION).\n" .
                  "Using Perl-only functions.\n";
             $load_perlonly = 1;
         }
@@ -489,8 +491,7 @@ __END__
  print "The time is $time{'hh:mm:ss'}\n";
  print "Another time is $time{'H:mm am tz', $another_time}\n";
  print "Timestamp: $time{'yyyymmdd.hhmmss.mmm'}\n";
-                                                                               .
-                                                                               .
+
  $strftime{$format}
  $strftime{$format, $unixtime}
  $strftime{$format, $sec,$min,$hour, $mday,$mon,$year, $wday,$yday,$isdst}
@@ -498,15 +499,13 @@ __END__
  print "POSIXish: $strftime{'%A, %B %d, %Y', 0,0,0,12,11,95,2}\n";
  print "POSIXish: $strftime{'%A, %B %d, %Y', 1054866251}\n";
  print "POSIXish: $strftime{'%A, %B %d, %Y'}\n";       # current time
-                                                                               .
-                                                                               .
+
  $manip{$format};
  $manip{$format,$when};
 
  print "Date::Manip: $manip{'%m/%d/%Y'}\n";            # current time
  print "Date::Manip: $manip{'%m/%d/%Y','last Tuesday'}\n";
-                                                                               .
-                                                                               .
+
  # These can also be used as standalone functions:
  use Time::Format qw(time_format time_strftime time_manip);
 
@@ -825,13 +824,11 @@ interpolated strings, otherwise you'll get something ugly like:
 
  # Rename a file based on its last-modify date:
  rename $file, "$file_$time{'yyyymmdd',(stat $file)[9]}";
-                                                                               .
-                                                                               .
+
  # stftime examples
  $strftime{'%A %B %d, %Y'}                 Thursday June 05, 2003
  $strftime{'%A %B %d, %Y',time+86400}      Friday June 06, 2003
-                                                                               .
-                                                                               .
+
  # manip examples
  $manip{'%m/%d/%Y'}                                   06/05/2003
  $manip{'%m/%d/%Y','yesterday'}                       06/04/2003
@@ -843,16 +840,9 @@ If the I18N::Langinfo module is available, Time::Format will return
 weekday and month names in the language appropriate for the current
 locale.  If not, English names will be used.
 
-Some testers have suggested making alternate hash variable names
-available for different languages.  Thus, for example, a French
-programmer could use C<%temps> instead of C<%time>, and a German
-could use C<%zeit>.  This would be nice, but would require
-Time::Format (and its author!)  to provide an equivalent to the word
-'time' in an arbitrary number of languages.
-
-Instead, I would recommend that non-English programmers provide an
-alias to C<%time> in their own preferred language.  This can be done
-by assigning C<\%time> to a typeglob:
+Programmers in non-English locales may want to provide an alias to
+C<%time> in their own preferred language.  This can be done by
+assigning C<\%time> to a typeglob:
 
     # French
     use Time::Format;
@@ -911,18 +901,18 @@ limitation.
 
 Eric J. Roode, roode@cpan.org
 
-Copyright (c) 2003 by Eric J. Roode. All Rights Reserved.  This module
-is free software; you can redistribute it and/or modify it under the
-same terms as Perl itself.
+Copyright (c) 2003-2004 by Eric J. Roode. All Rights Reserved.
+This module is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
 
 =begin gpg
 
 -----BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.2.2 (GNU/Linux)
+Version: GnuPG v1.2.4 (Cygwin)
 
-iD8DBQE/KV6SY96i4h5M0egRAuh7AKCe2gc9oGywhf0oyjw4Ql8mbZZeRgCgrE9f
-OIIB5ni96Xmcal2ZZE+i8FU=
-=xnFe
+iD8DBQFBVFR5Y96i4h5M0egRAjjXAJ9W80HgtzB7y3jDcPjRTPtmu32RYgCghTUX
+oGcjgc+O6/vb4Q9mlaQm2bg=
+=o0rP
 -----END PGP SIGNATURE-----
 
 =end gpg

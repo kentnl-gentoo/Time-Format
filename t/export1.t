@@ -9,6 +9,8 @@ BEGIN { use_ok 'Time::Format' }
 is ref tied %time, Time::Format    => '%time exported by default';
 is ref tied %strftime, ''          => '%strftime not exported by default';
 is ref tied %manip,    ''          => '%manip not exported by default';
+eval {%strftime = ()};   # suppress "used only once" warning
+eval {%manip    = ()};   # suppress "used only once" warning
 
 # functions exported properly?
 ok  defined &time_format            => 'time_format exported by default';

@@ -15,6 +15,7 @@ BEGIN {
     %POSIX:: = ();
 }
 my $manip_bad;
+my $manip_notz;
 BEGIN {
     eval 'use Date::Manip ()';
     $manip_bad = $@? 1 : 0;
@@ -22,7 +23,7 @@ BEGIN {
     {
         # If Date::Manip can't determine the time zone, it'll bomb out of the tests.
         eval 'Date::Manip::Date_TimeZone ()';
-        $manip_bad = $@? 1 : 0;
+        $manip_notz = $@? 1 : 0;
     }
     delete $INC{'Date/Manip.pm'};
     %Date::Manip:: = ();
@@ -71,7 +72,8 @@ SKIP:
     # time_manip tests (5)
     SKIP:
     {
-        skip 'Date::Manip not available', 5 if $manip_bad;
+        skip 'Date::Manip not available',             5 if $manip_bad;
+        skip 'Date::Manip cannot determine timezone', 5 if $manip_notz;
         my $m = 'first thursday in june 2003';
         is time_manip('%Y',$m),      '2003'      => 'year';
         is time_manip('%d',$m),      '05'        => 'day of month';

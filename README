@@ -1,10 +1,14 @@
-Time/Format version 0.13
+Time/Format version 1.00
 ========================
 
 Time::Format provides a very easy way to format dates and times.  The
 formatting functions are tied to hash variables, so they can be used
 inside strings as well as in ordinary expressions.  The formatting
-codes used are meant to be easy to remember, use, and read.
+codes used are meant to be easy to remember, use, and read.  They
+follow a simple, consistent pattern.  If I've done my job right, once
+you learn the codes, you should never have to refer to the
+documentation again.  A quick-reference page is included, just in
+case.  ;-)
 
 Also provided is a tied-hash interface to POSIX::strftime and
 Date::Manip::UnixDate.
@@ -43,11 +47,10 @@ you can use if you prefer (or need) a function-based interface.
 
 DEVELOPMENT STATE
 
-Time::Format is a brand new module.  It has a good test suite, but it
-hasn't been used much in the Real World yet.  Thus it should be
-considered "late beta" software.  When six months pass without any
-bugs being reported, or any features being added, I'll bump the
-version to 1.0.
+No bug reports or feature requests have been submitted in the twelve
+months since v0.13 was released; therefore it seems safe to up the
+version number to 1.00 and call it "released" -- either there are no
+serious bugs, or nobody's using the module!
 
 If you find any bugs, or if any behavior of Time::Format surprises
 you, I would be grateful if you could send me an email message about
@@ -89,6 +92,6 @@ COPYRIGHT AND LICENSE
 
 Eric J. Roode, roode@cpan.org
 
-Copyright (c) 2003 by Eric J. Roode. All Rights Reserved.  This module
-is free software; you can redistribute it and/or modify it under the
-same terms as Perl itself.
+Copyright (c) 2003-2004 by Eric J. Roode. All Rights Reserved.
+This module is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
