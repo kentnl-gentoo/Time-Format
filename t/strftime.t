@@ -5,7 +5,12 @@ use Test::More tests => 5;
 
 BEGIN { use_ok 'Time::Format', qw(%strftime) }
 my $posix_bad;
-BEGIN { eval 'use POSIX'; $posix_bad = $@? 1 : 0; delete $INC{'POSIX.pm'}; }
+BEGIN {
+    eval 'use POSIX ()';
+    $posix_bad = $@? 1 : 0;
+    delete $INC{'POSIX.pm'};
+    %POSIX:: = ();
+}
 my $tl_bad;
 BEGIN { eval 'use Time::Local'; $tl_bad = $@? 1 : 0 }
 

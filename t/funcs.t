@@ -7,9 +7,25 @@ BEGIN { use_ok 'Time::Format', qw(time_format time_strftime time_manip) }
 my $tl_notok;
 BEGIN { eval 'use Time::Local'; $tl_notok = $@? 1 : 0 }
 my $posix_bad;
-BEGIN { eval 'use POSIX'; $posix_bad = $@? 1 : 0; delete $INC{'POSIX.pm'}; }
+BEGIN {
+    eval 'use POSIX ()';
+    $posix_bad = $@? 1 : 0;
+    delete $INC{'POSIX.pm'};
+    %POSIX:: = ();
+}
 my $manip_bad;
-BEGIN { eval 'use Date::Manip'; $manip_bad = $@? 1 : 0; delete $INC{'Date/Manip.pm'}; }
+BEGIN {
+    eval 'use Date::Manip ()';
+    $manip_bad = $@? 1 : 0;
+    unless ($manip_bad)
+    {
+        # If Date::Manip can't determine the time zone, it'll bomb out of the tests.
+        eval 'Date::Manip::Date_TimeZone ()';
+        $manip_bad = $@? 1 : 0;
+    }
+    delete $INC{'Date/Manip.pm'};
+    %Date::Manip:: = ();
+}
 
 # Get day/month names in current locale
 my ($Thursday, $Thu, $June, $Jun);

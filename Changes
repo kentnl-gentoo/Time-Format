@@ -34,3 +34,8 @@ Revision history for Perl extension Time::Format.
 0.08  2003 June 22
         - Distribute correct SIGNATURE file; a bad one was distributed
           with v0.07.  (Thanks to Jeroen Latour again).
+
+0.09  2003 June 23
+        - Add more checking on the Date::Manip module, which dies messily
+          if it gets upset about not finding things like Time Zone.  This
+          affects the test suite only -- No changes to Time::Format.

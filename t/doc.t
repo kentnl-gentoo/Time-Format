@@ -9,7 +9,18 @@ BEGIN { use_ok 'Time::Format', qw(:all) }
 my $tl_notok;
 BEGIN { eval 'use Time::Local'; $tl_notok = $@? 1 : 0 }
 my $dm_notok;
-BEGIN { eval 'use Date::Manip'; $dm_notok = $@? 1 : 0; delete $INC{'Date/Manip.pm'} }
+BEGIN {
+    eval 'use Date::Manip ()';
+    $dm_notok = $@? 1 : 0;
+    unless ($dm_notok)
+    {
+        # If Date::Manip can't determine the time zone, it'll bomb out of the tests.
+        eval 'Date::Manip::Date_TimeZone ()';
+        $dm_notok = $@? 1 : 0;
+    }
+    delete $INC{'Date/Manip.pm'};
+    %Date::Maip:: = ();
+}
 
 # Were all variables imported? (3)
 is ref tied %time,     'Time::Format'   =>  '%time imported';
