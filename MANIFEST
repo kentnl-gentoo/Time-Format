@@ -1,0 +1,10 @@
+Changes
+Makefile.PL
+MANIFEST
+README
+Format.pm
+t/time.t
+t/strftime.t
+t/manip.t
+t/die.t
+t/doc.t

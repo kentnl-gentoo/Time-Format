@@ -1,0 +1,9 @@
+Revision history for Perl extension Time::Format.
+
+0.01  2003 June 8
+	- First version
+
+0.02  2003 June 10
+        - Change the %time formatting codes.
+        - Speed up the code somewhat.
+        - Add many tests

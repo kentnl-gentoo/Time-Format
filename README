@@ -1,0 +1,64 @@
+Time/Format version 0.02
+========================
+
+Time::Format provides a very easy way to format dates and times.  The
+formatting functions are tied to hash variables, so they can be used
+inside strings as well as in ordinary expressions.  The formatting
+codes used are meant to be easy to remember, use, and read.
+
+EXAMPLES
+
+ $time{'Weekday Month d, yyyy'}   Thursday June 5, 2003
+ $time{'Day Mon d, yyyy'}         Thu Jun 5, 2003
+ $time{'DAY MON d, yyyy'}         THU JUN 5, 2003
+ $time{'dd/mm/yyyy'}              05/06/2003
+ $time{yymd}                      030605
+
+ $time{'H:mm:ss am'}              1:02:14 pm
+ $time{'hh:mm:ss.uuuuuu'}         13:02:14.171447
+
+ $time{'yyyy/mm/dd hh:mm:ss.mmm'} 2003/06/05 13:02:14.171
+
+ $strftime{'%A %B %e, %Y'}        Thursday June  5, 2003
+
+ $manip{'%m/%d/%Y'}               06/05/2003
+ $manip{'%m/%d/%Y','yesterday'}   06/04/2003
+ $manip{'%m/%d/%Y','first monday in November 2000'}  11/06/2000
+
+
+DEVELOPMENT STATE
+
+Time::Format is a brand new module.  It has a decent test suite, but
+it hasn't been used much in the Real World yet.  Thus it should be
+considered "beta" software.  If six months pass without any bugs being
+reported, or any features being added, I'll bump the version to 1.0.
+
+
+INSTALLATION
+
+To install this module, do the standard Perl module four-step:
+
+   perl Makefile.PL    or    perl Makefile.pl LIB='my/install/path'
+   make
+   make test
+   make install
+
+
+DEPENDENCIES
+
+This module requires these other modules and libraries:
+
+  Carp
+  Exporter
+  POSIX          (optional)
+  Time::HiRes    (optional)
+  Date::Manip    (optional)
+
+
+COPYRIGHT AND LICENSE
+
+Eric J. Roode, roode@cpan.org
+
+Copyright (c) 2003 by Eric J. Roode. All Rights Reserved.  This module
+is free software; you can redistribute it and/or modify it under the
+same terms as Perl itself.
