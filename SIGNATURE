@@ -1,5 +1,5 @@
 This file contains message digests of all files listed in MANIFEST,
-signed via the Module::Signature module, version 0.22.
+signed via the Module::Signature module, version 0.28.
 
 To verify the content in this distribution, first make sure you have
 Module::Signature installed, then type:
@@ -14,29 +14,36 @@ not run its Makefile.PL or Build.PL.
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA1
 
-SHA1 d8cd94cc49bdda2fac0101836c61bdcb31d153f6 Changes
-SHA1 179c819d729bcd2970027144e7852454d5e1ddf5 Format.pm
-SHA1 b51290f213f136e7036a3a4cbffc5f119f14ee12 MANIFEST
+SHA1 aad9f3246f5f8745cb38bc582232cfa265e97bdb Changes
+SHA1 977f685dc9d0a2bd54fb7c1bdfb4f014c8bdfc8f Format.pm
+SHA1 374b474fbffac4956af4048786b7fef6b435fc46 MANIFEST
 SHA1 a07e97c0d66cec79c92243517f92659de322dff9 Makefile.PL
-SHA1 7c864d4e66017a955985a98a903f56777926ca21 README
-SHA1 08b481f384507a6229f13d40e1f420091fce2a11 Time-Format-ppm.tar.gz
-SHA1 d75ad449bf8fdaedea9de532767d0afcc8314b9e Time-Format.ppd
+SHA1 51ecebf658853282ae0fe2be4bcd5283263d82c6 README
+SHA1 372596581d25ac62de3ae58be0d0f90e6d130a7b Time-Format-ppm.tar.gz
+SHA1 a607eb6200325948826b5b0446b3716470b6026c Time-Format.ppd
+SHA1 a297a2967a6e7ad16daef62c59c897ef1faf78d2 quickref.ps
+SHA1 e0246bc6d65fb96a0173eff7082fc30b50a5af60 quickref.txt
 SHA1 fa5807c950a0d17cf58ffde3f7dd6ab63025de5a t/0-signature.t
-SHA1 4d80d863a47e150d668728a126b3100556167af4 t/die.t
-SHA1 8069bc646deaea9549cd58135d2bef727ffb60fd t/doc.t
-SHA1 dc670b28dc09d45cc0f57419073a693d7a4aa382 t/export1.t
-SHA1 a4db8d4c7ccf026c35ea589bc2ad3902fc163a36 t/export2.t
-SHA1 76c0b5a53ef7ecdb665d3bc05172058d8fc0e906 t/export3.t
-SHA1 8c292efad6d2f4a8af81796f4f9a3a53f75c6a83 t/funcs.t
-SHA1 de8f59948c87ddbc8cccdc6d9ee352372ee77d36 t/locale.t
-SHA1 f1baeb296ff0457e507e933f30641fd5624e66af t/manip.t
-SHA1 5d6e5f5d896a10e14f0a7fc5e95aeb87a6d2f672 t/quot.t
-SHA1 918a9e921bb7ca836da7708d142a2744e4c949c1 t/strftime.t
-SHA1 9e656f25f5155f0eed7442f403ab05a14d017ad5 t/time.t
+SHA1 e54c03886f4466bbe803cfbea88226a430f4511d t/die.t
+SHA1 6005dffa95a19f2f16880c9b50370df9a8c45b29 t/doc.t
+SHA1 6c391e71d5c35cdc1fedc74a0338adfe958a3ee5 t/export1.t
+SHA1 96054241cdd6d43799569b5dd7efb7ada9964fc2 t/export2.t
+SHA1 845f6c222e56bd473c6138d0d63e46b5612cb81c t/export3.t
+SHA1 cf64a1558f8a185bbcb28a5904aee60e2afd6d05 t/funcs.t
+SHA1 32e6bb93cb5c4b65c248db7dab0caf23ad4a14f8 t/locale.t
+SHA1 c95b02219f2f8e8b8c6cc943a4e3b00454997134 t/manip.t
+SHA1 185ec016a44b3730f7985c9d003c51d750bb00c1 t/quot.t
+SHA1 7b8ec55b5bc1e2ae967b6ff022a7dd8514280fba t/strftime.t
+SHA1 175fde927fc1ceebe47e99b7383a5bbf38cdd746 t/time.t
+SHA1 82a8be2bdebe7dfdd09d97fe7b881eea75b3dce5 t/xs_doc.t
+SHA1 cfceea17dd7c6701502fe9813b4cceb78c2880d5 t/xs_funcs.t
+SHA1 0fa482612d660c83874af325e428a896b80f12ac t/xs_locale.t
+SHA1 16c230d45acb4cf65e8a7bae2cfc2c0deb97f9d8 t/xs_quot.t
+SHA1 5e066ed1e85efe6e0d68570b022fc615d0be8ea8 t/xs_time.t
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.2.2 (GNU/Linux)
 
-iD8DBQE/G1wvY96i4h5M0egRAoJQAKD5joif2A+bHUK8NVc1b1qlH/L3CQCg3euh
-J+rHDCFYZgmDvz6GQcXry0Q=
-=IUpe
+iD8DBQE/KmRdY96i4h5M0egRAvQwAKDro0VGP9bU+abe9k9MJZvBNE3nIgCg9NnJ
+k1bqFo7E2IiIfrIl/vkxM+U=
+=mmxV
 -----END PGP SIGNATURE-----

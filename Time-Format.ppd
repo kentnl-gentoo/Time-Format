@@ -1,9 +1,9 @@
-<SOFTPKG NAME="Time-Format" VERSION="0,12,0,0">
+<SOFTPKG NAME="Time-Format" VERSION="0,13,0,0">
 	<TITLE>Time-Format</TITLE>
 	<ABSTRACT>Easy-to-use date/time formatting.</ABSTRACT>
 	<AUTHOR>Eric Roode &lt;roode@cpan.org&gt;</AUTHOR>
 	<IMPLEMENTATION>
 		<DEPENDENCY NAME="Test-Simple" VERSION="0,40,0,0" />
-		<CODEBASE HREF="http://search.cpan.org/src/ROODE/Time-Format-0.12/Time-Format-ppm.tar.gz" />
+		<CODEBASE HREF="http://search.cpan.org/src/ROODE/Time-Format-0.13/Time-Format-ppm.tar.gz" />
 	</IMPLEMENTATION>
 </SOFTPKG>

@@ -1,32 +1,17 @@
 #!/perl -I..
 
 # Test examples in the docs, so we know we're not misleading anyone.
+# XS TEST: Only need to test the %time and time_format bits.
 
 use strict;
-use Test::More tests => 26;
+use Test::More tests => 18;
 
-BEGIN { $Time::Format::NOXS = 1 }
 BEGIN { use_ok 'Time::Format', qw(:all) }
 my $tl_notok;
 BEGIN { eval 'use Time::Local'; $tl_notok = $@? 1 : 0 }
-my $dm_notok;
-BEGIN {
-    eval 'use Date::Manip ()';
-    $dm_notok = $@? 1 : 0;
-    unless ($dm_notok)
-    {
-        # If Date::Manip can't determine the time zone, it'll bomb out of the tests.
-        eval 'Date::Manip::Date_TimeZone ()';
-        $dm_notok = $@? 1 : 0;
-    }
-    delete $INC{'Date/Manip.pm'};
-    %Date::Maip:: = ();
-}
 
-# Were all variables imported? (3)
+# Were all variables imported? (1)
 is ref tied %time,     'Time::Format'   =>  '%time imported';
-is ref tied %strftime, 'Time::Format'   =>  '%strftime imported';
-is ref tied %manip,    'Time::Format'   =>  '%manip imported';
 
 # Get day/month names in current locale
 my ($Tuesday, $December, $Thursday, $Thu, $June, $Jun);
@@ -50,19 +35,17 @@ unless ($tl_notok)
 
 SKIP:
 {
-    skip 'Time::Local not available', 22 if $tl_notok;
+    skip 'Time::Local not available', 16  if $tl_notok;
+    skip 'XS version not available',  16  if !defined $Time::Format_XS::VERSION;
 
-    # Synopsis tests (7)
+    # Synopsis tests (5)
     is "Today is $time{'yyyy/mm/dd',$t}", 'Today is 2003/06/05'   => 'Today';
     is "Yesterday was $time{'yyyy/mm/dd', $t-24*60*60}", 'Yesterday was 2003/06/04'  => 'Yesterday';
     is "The time is $time{'hh:mm:ss',$t}", 'The time is 13:58:09'    => 'time';
     is "Another time is $time{'H:mm am', $t}", 'Another time is 1:58 pm'             => 'Another time';
     is "Timestamp: $time{'yyyymmdd.hhmmss.mmm',$t}", 'Timestamp: 20030605.135809.987'   => 'Timestamp';
 
-    is "POSIXish: $strftime{'%A, %B %d, %Y', 0,0,0,12,11,95,2}", "POSIXish: $Tuesday, $December 12, 1995"   => 'POSIX 1';
-    is "POSIXish: $strftime{'%A, %B %d, %Y', int $t}",       "POSIXish: $Thursday, $June 05, 2003"   => 'POSIX 2';
-
-    # Examples section (12)
+    # Examples section (11)
     is $time{'Weekday Month d, yyyy',$t},   "$Thursday $June 5, 2003"       => 'Example 1';
     is $time{'Day Mon d, yyyy',$t},         "$Thu $Jun 5, 2003"             => 'Example 2';
     is $time{'dd/mm/yyyy',$t},              "05/06/2003"                    => 'Example 3';
@@ -77,15 +60,4 @@ SKIP:
 
     is $time{"It's H:mm.",$t},              "It'9 1:58."                    => 'Example 10';
     is $time{"It'\\s H:mm.",$t},            "It's 1:58."                    => 'Example 11';
-
-    is $strftime{'%A %B %d, %Y',$t},        "$Thursday $June 05, 2003"      => 'Example 12';
-
-    # manip tests (3)
-    SKIP:
-    {
-        skip 'Date::Manip not available', 3  if $dm_notok;
-        is $manip{'%m/%d/%Y',"epoch $t"},                       '06/05/2003'    => 'Example 13';
-        is $manip{'%m/%d/%Y','first monday in November 2000'},  '11/06/2000'    => 'Example 14';
-        is qq[$time{'yyyymmdd',$manip{'%s',"epoch $t"}}],       '20030605'      => 'Example 15';
-    }
 }

@@ -8,32 +8,67 @@ Time::Format - Easy-to-use date/time formatting.
 
 =head1 VERSION
 
-This documentation describes version 0.12 of Time::Format.pm, July 17, 2003.
+This documentation describes version 0.13 of Time::Format.pm, August 1, 2003.
 
 =cut
 
 use strict;
 package Time::Format;
 
-$Time::Format::VERSION = '0.12';
+$Time::Format::VERSION = '0.13';
 
-# Check whether the optional XS module is installed.
-eval { require Time::Format_XS };
-if (!$@  &&  defined &Time::Format_XS::time_format)
+my $load_perlonly = 0;
+
+$load_perlonly = 1 if defined $Time::Format::NOXS  &&  $Time::Format::NOXS;
+
+if (!$load_perlonly)
 {
-    *time_format = sub
+    # Check whether the optional XS module is installed.
+    eval { require Time::Format_XS };
+
+    if ($@  ||  !defined $Time::Format_XS::VERSION)
     {
-        my $fmt = shift;
-        my $time = (@_  &&  $_[0] ne 'time')? shift : _have('Time::HiRes')? Time::HiRes::time() : time;
-        Time::Format_XS::time_format($fmt, $time);
+        $load_perlonly = 1;
+    }
+    else
+    {
+        if ($Time::Format_XS::VERSION  ne  $Time::Format::VERSION)
+        {
+            warn "Time::Format_XS version ($Time::Format_XS::VERSION) " .
+                 "does not match Time::Format version ($Time::Format::VERSION).\n" .
+                 "Using Perl-only functions.\n";
+            $load_perlonly = 1;
+        }
+    }
+
+    if (!$load_perlonly)
+    {
+        *time_format = sub
+        {
+            my $fmt = shift;
+            my $time = (@_  &&  $_[0] ne 'time')? shift : _have('Time::HiRes')? Time::HiRes::time() : time;
+            Time::Format_XS::time_format($fmt, $time);
+        }
     }
 }
-else    # Time::Format_XS not installed.  Load the perl routines to do it.
+
+if ($load_perlonly)
 {
-    local $/ = undef;
-    eval <DATA>;
-    die if $@;
+    # Time::Format_XS not installed, or version mismatch, or NOXS was set.
+    # The perl routines will need to be loaded.
+    # But defer this until someone actually calls time_format().
+    *time_format_perlonly = sub
+    {
+        local $^W = 0;    # disable warning about subroutine redefined
+        local $/ = undef;
+        eval <DATA>;
+        die if $@;
+        goto &time_format_perlonly;
+    };
+    *time_format = sub { goto &time_format_perlonly };
+    undef $Time::Format_XS::VERSION;    # Indicate that XS version is not available.
 }
+
 
 my @EXPORT      = qw(%time time_format);
 my @EXPORT_OK   = qw(%time %strftime %manip time_format time_strftime time_manip);
@@ -183,7 +218,6 @@ sub time_manip
 
 1;
 __DATA__
-#line __LINE__ __FILE__
 # The following is only compiled if Time::Format_XS is not available.
 
 
@@ -323,7 +357,7 @@ sub _loctime
 my %disam;    # Disambiguator for 'm' format.
 $disam{$_} = "{on}" foreach qw/yy d dd ?d/;           # If year or day is nearby, it's 'month'
 $disam{$_} = "{in}" foreach qw/h hh ?h H HH ?H s ss ?s/;   # If hour or second is nearby, it's 'minute'
-sub time_format
+sub time_format_perlonly
 {
     my $fmt  = shift;
     my $time = &_loctime;
@@ -449,30 +483,33 @@ __END__
 
  $time{$format}
  $time{$format, $unixtime}
- 
+
  print "Today is $time{'yyyy/mm/dd'}\n";
  print "Yesterday was $time{'yyyy/mm/dd', time-24*60*60}\n";
  print "The time is $time{'hh:mm:ss'}\n";
  print "Another time is $time{'H:mm am tz', $another_time}\n";
  print "Timestamp: $time{'yyyymmdd.hhmmss.mmm'}\n";
-
+                                                                               .
+                                                                               .
  $strftime{$format}
  $strftime{$format, $unixtime}
  $strftime{$format, $sec,$min,$hour, $mday,$mon,$year, $wday,$yday,$isdst}
- 
+
  print "POSIXish: $strftime{'%A, %B %d, %Y', 0,0,0,12,11,95,2}\n";
  print "POSIXish: $strftime{'%A, %B %d, %Y', 1054866251}\n";
  print "POSIXish: $strftime{'%A, %B %d, %Y'}\n";       # current time
-
+                                                                               .
+                                                                               .
  $manip{$format};
  $manip{$format,$when};
- 
+
  print "Date::Manip: $manip{'%m/%d/%Y'}\n";            # current time
  print "Date::Manip: $manip{'%m/%d/%Y','last Tuesday'}\n";
-
+                                                                               .
+                                                                               .
  # These can also be used as standalone functions:
  use Time::Format qw(time_format time_strftime time_manip);
- 
+
  print "Today is ", time_format('yyyy/mm/dd', $some_time), "\n";
  print "POSIXish: ", time_strftime('%A %B %d, %Y',$some_time), "\n";
  print "Date::Manip: ", time_manip('%m/%d/%Y',$some_time), "\n";
@@ -480,7 +517,7 @@ __END__
 =head1 DESCRIPTION
 
 This module creates global pseudovariables which format dates and
-times, according to formatting codes you pass to it in strings.
+times, according to formatting codes you pass to them in strings.
 
 The C<%time> formatting codes are designed to be easy to remember and
 use, and to take up just as many characters as the output time value
@@ -505,7 +542,7 @@ easiest formats to use and remember in Time::Format: C<yyyy>, C<mm>,
 C<dd>, C<hh>, C<mm>, C<ss>.  Variants on these formats follow a simple
 and consistent formula.  This module is for everyone who is weary of
 trying to remember I<strftime(3)>'s arcane codes, or of endlessly
-writing C<$t[4]++; $t[5]+=1900>.
+writing C<$t[4]++; $t[5]+=1900> as you manually format times or dates.
 
 Note that C<mm> (and related codes) are used both for months and
 minutes.  This is a feature.  C<%time> resolves the ambiguity by
@@ -514,7 +551,7 @@ year or a day, "month" is assumed.  If in the context of an hour or a
 second, "minute" is assumed.
 
 The format strings are not meant to encompass every date/time need
-ever conceived.  But hey, how often do you need the day of the year
+ever conceived.  But how often do you need the day of the year
 (strftime's C<%j>) or the week number (strftime's C<%W>)?
 
 For capabilities that C<%time> does not provide, C<%strftime> provides
@@ -524,7 +561,6 @@ interface to the Date::Manip module's C<UnixDate> function.
 If the companion module Time::Format_XS is also installed,
 Time::Format will detect and use it.  This will result in a
 significant speed increase for C<%time> and C<time_format>.
-
 
 =head1 VARIABLES
 
@@ -541,52 +577,52 @@ is used.  The format string may contain any of the following:
 
     yyyy       4-digit year
     yy         2-digit year
-    
+
     m          1- or 2-digit month, 1-12
     mm         2-digit month, 01-12
     ?m         month with leading space if < 10
-    
+
     Month      full month name, mixed-case
     MONTH      full month name, uppercase
     month      full month name, lowercase
     Mon        3-letter month abbreviation, mixed-case
     MON  mon   ditto, uppercase and lowercase versions
-    
+
     d          day number, 1-31
     dd         day number, 01-31
     ?d         day with leading space if < 10
     th         day suffix (st, nd, rd, or th)
     TH         uppercase suffix
-    
+
     Weekday    weekday name, mixed-case
     WEEKDAY    weekday name, uppercase
     weekday    weekday name, lowercase
     Day        3-letter weekday name, mixed-case
     DAY  day   ditto, uppercase and lowercase versions
-    
+
     h          hour, 0-23
     hh         hour, 00-23
     ?h         hour, 0-23 with leading space if < 10
-    
+
     H          hour, 1-12
     HH         hour, 01-12
     ?H         hour, 1-12 with leading space if < 10
-    
+
     m          minute, 0-59
     mm         minute, 00-59
     ?m         minute, 0-59 with leading space if < 10
-    
+
     s          second, 0-59
     ss         second, 00-59
     ?s         second, 0-59 with leading space if < 10
     mmm        millisecond, 000-999
     uuuuuu     microsecond, 000000-999999
-    
+
     am   a.m.  The string "am" or "pm" (second form with periods)
     pm   p.m.  same as "am" or "a.m."
     AM   A.M.  same as "am" or "a.m." but uppercase
     PM   P.M.  same as "AM" or "A.M."
-    
+
     tz         time zone abbreviation
 
 Millisecond and microsecond require Time::HiRes, otherwise they'll
@@ -623,7 +659,7 @@ To remove the ambiguity, you can use the following codes:
     m{on}        month, 1-12
     mm{on}       month, 01-12
     ?m{on}       month, 1-12 with leading space if < 10
-    
+
     m{in}        minute, 0-59
     mm{in}       minute, 00-59
     ?m{in}       minute, 0-59 with leading space if < 10
@@ -654,7 +690,7 @@ does not provide.
 Provides an interface to the Date::Manip module's C<UnixDate>
 function.  This function is rather slow, but can parse a very wide
 variety of date input.  See the Date::Manip module for details
-about the formats accepted.
+about the inputs accepted.
 
 If you want to use the C<%time> codes, but need the input flexibility
 of C<%manip>, you can use Date::Manip's C<%s> format and nest the
@@ -699,9 +735,9 @@ time.
  manip($format,$when);
 
 This is a function interface to C<%manip>.  It calls
-Date::Manip::C<UnixDate> under the hood, but it has a very slight
-advantage over calling C<UnixDate> directly, in that you can omit the
-C<$when> parameter in order to get the current time.
+Date::Manip::C<UnixDate> under the hood.  It does not provide much of
+an advantage over calling C<UnixDate> directly, except that you can
+omit the C<$when> parameter in order to get the current time.
 
 =back
 
@@ -754,8 +790,9 @@ Time::Format gets it:
 Time::Format also recognizes and simulates the \U, \L, \u, and \l
 sequences.  This is really only useful for finer control of the Month,
 Mon, Weekday, and Day formats.  For example, in some locales, the
-month names are all-lowercase by default.  At the start of a sentence,
-you may want to ensure that the first character is uppercase:
+month names are all-lowercase by convention.  At the start of a
+sentence, you may want to ensure that the first character is
+uppercase:
 
     $time{'\uMonth \Qis the finest month of all.'};
 
@@ -772,31 +809,33 @@ interpolated strings, otherwise you'll get something ugly like:
  $time{yymmdd}                    030605
  $time{'yymmdd',time-86400}       030604
  $time{'dth of Month'}            5th of June
- 
+
  $time{'H:mm:ss am'}              1:02:14 pm
  $time{'hh:mm:ss.uuuuuu'}         13:02:14.171447
- 
+
  $time{'yyyy/mm{on}/dd hh:mm{in}:ss.mmm'}  2003/06/05 13:02:14.171
  $time{'yyyy/mm/dd hh:mm:ss.mmm'}          2003/06/05 13:02:14.171
- 
+
  $time{"It's H:mm."}              It'14 1:02.    # OOPS!
  $time{"It'\\s H:mm."}            It's 1:02.     # Backslash fixes it.
-
+                                                                               .
+                                                                               .
  # Rename a file based on today's date:
  rename $file, "$file_$time{yyyymmdd}";
- 
+
  # Rename a file based on its last-modify date:
  rename $file, "$file_$time{'yyyymmdd',(stat $file)[9]}";
-
+                                                                               .
+                                                                               .
  # stftime examples
  $strftime{'%A %B %d, %Y'}                 Thursday June 05, 2003
  $strftime{'%A %B %d, %Y',time+86400}      Friday June 06, 2003
-
+                                                                               .
+                                                                               .
  # manip examples
  $manip{'%m/%d/%Y'}                                   06/05/2003
  $manip{'%m/%d/%Y','yesterday'}                       06/04/2003
  $manip{'%m/%d/%Y','first monday in November 2000'}   11/06/2000
-
 
 =head1 INTERNATIONALIZATION
 
@@ -818,10 +857,12 @@ by assigning C<\%time> to a typeglob:
     # French
     use Time::Format;
     use vars '%temps';  *temps = \%time;
+    print "C'est aujourd'hui le $temps{'d Month'}\n";
 
     # German
     use Time::Format;
     use vars '%zeit';   *zeit = \%time;
+    print "Heutiger Tag ist $zeit{'d.m.yyyy'}\n";
 
 etc.
 
@@ -850,7 +891,8 @@ The format string used by C<%time> must not have $; as a substring
 anywhere.  $; (by default, ASCII character 28, or 1C hex) is used to
 separate values passed to the tied hash, and thus Time::Format will
 interpret your format string to be two or more arguments if it
-contains $;.  The C<time_format> function does not have this problem.
+contains $;.  The C<time_format> function does not have this
+limitation.
 
 =head1 REQUIREMENTS
 
@@ -859,8 +901,11 @@ contains $;.  The C<time_format> function does not have this problem.
  Time::HiRes, if you want the C<mmm> and C<uuuuuu> time formats to work.
  Date::Manip, if you choose to use %manip.
  Time::Local (only needed to run the 'make test' suite).
+
  Time::Format_XS is optional but will make C<%time> and C<time_format>
-     much faster.
+     much faster.  The version of Time::Format_XS installed must match
+     the version of Time::Format installed; otherwise Time::Format will
+     not use it (and will issue a warning).
 
 =head1 AUTHOR / COPYRIGHT
 
@@ -875,9 +920,9 @@ same terms as Perl itself.
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.2.2 (GNU/Linux)
 
-iD8DBQE/GuPGY96i4h5M0egRAlVdAKC6qSNyzMcbL9m13VvtukT9lO2XWgCg+tNs
-nkaB23Rg2jZM86ELj7Avu1k=
-=XMkw
+iD8DBQE/KV6SY96i4h5M0egRAuh7AKCe2gc9oGywhf0oyjw4Ql8mbZZeRgCgrE9f
+OIIB5ni96Xmcal2ZZE+i8FU=
+=xnFe
 -----END PGP SIGNATURE-----
 
 =end gpg

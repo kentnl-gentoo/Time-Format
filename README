@@ -1,4 +1,4 @@
-Time/Format version 0.12
+Time/Format version 0.13
 ========================
 
 Time::Format provides a very easy way to format dates and times.  The
@@ -11,6 +11,10 @@ Date::Manip::UnixDate.
 
 If the I18N::Langinfo module is available, Time::Format provides
 weekday and month names in a language appropriate for your locale.
+
+A companion module, Time::Format_XS, is also available; if it is
+installed, Time::Format will detect and use it, which will result in a
+significant speed improvement.
 
 EXAMPLES
 
@@ -33,17 +37,17 @@ EXAMPLES
  $manip{'%m/%d/%Y','yesterday'}   06/04/2003
  $manip{'%m/%d/%Y','first monday in November 2000'}  11/06/2000
 
-There are also corresponding functions for each of these hashes,
-which you can use if you prefer a function-based interface.
+There are also corresponding functions for each of these hashes, which
+you can use if you prefer (or need) a function-based interface.
 
 
 DEVELOPMENT STATE
 
 Time::Format is a brand new module.  It has a good test suite, but it
 hasn't been used much in the Real World yet.  Thus it should be
-considered "beta" software.  When six months pass without any bugs
-being reported, or any features being added, I'll bump the version to
-1.0.
+considered "late beta" software.  When six months pass without any
+bugs being reported, or any features being added, I'll bump the
+version to 1.0.
 
 If you find any bugs, or if any behavior of Time::Format surprises
 you, I would be grateful if you could send me an email message about
@@ -61,7 +65,7 @@ To install this module, do the standard Perl module four-step:
 
 WINDOWS (ACTIVESTATE) USERS
 
-Version 0.11 fixes some problems ActiveState users had with
+Versions 0.11 and 0.13 fix some problems ActiveState users had with
 installation.  Also, a ppm installation is now available.  This is
 still experimental, as the author is not experienced with the AS
 product.  Try the included PPD file.  It points to the Time::Format

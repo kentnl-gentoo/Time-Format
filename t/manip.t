@@ -3,6 +3,7 @@
 use strict;
 use Test::More tests => 6;
 
+BEGIN { $Time::Format::NOXS = 1 }
 BEGIN { use_ok 'Time::Format', qw(%manip) }
 my $manip_bad;
 BEGIN {

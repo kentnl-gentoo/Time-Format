@@ -57,3 +57,9 @@ Revision history for Perl extension Time::Format.
           Mark Jason Dominus for his thoughts on this topic.
         - Don't bother compiling the Perl routines until we know that
           the XS routines (in Time::Format_XS) are not available.
+
+0.13  2003 August 1
+        - Check that the version of Time::Format_XS matches our version.
+        - Test suite now tests perl-only routines separately from
+          XS-enabled routines.
+        - Further delay compilation of time_format until needed.

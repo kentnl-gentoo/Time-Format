@@ -3,7 +3,6 @@
 use strict;
 use Test::More tests => 23;
 
-BEGIN { $Time::Format::NOXS = 1 }
 BEGIN { use_ok 'Time::Format' }
 
 my $tl_notok;
@@ -27,6 +26,7 @@ my $JUNE = uc $June;
 SKIP:
 {
     skip 'Time::Local not available', 22  if $tl_notok;
+    skip 'XS version not available',  22  if !defined $Time::Format_XS::VERSION;
     my $t = timelocal(9, 58, 13, 5, 5, 103);    # June 5, 2003 at 1:58:09 pm
     $t .= '.987654321';
 

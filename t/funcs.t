@@ -3,6 +3,7 @@
 use strict;
 use Test::More tests => 15;
 
+BEGIN { $Time::Format::NOXS = 1 }
 BEGIN { use_ok 'Time::Format', qw(time_format time_strftime time_manip) }
 my $tl_notok;
 BEGIN { eval 'use Time::Local'; $tl_notok = $@? 1 : 0 }

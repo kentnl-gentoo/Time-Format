@@ -6,6 +6,8 @@ SIGNATURE
 Format.pm
 Time-Format.ppd
 Time-Format-ppm.tar.gz
+quickref.txt
+quickref.ps
 t/0-signature.t
 t/time.t
 t/strftime.t
@@ -18,3 +20,8 @@ t/export1.t
 t/export2.t
 t/export3.t
 t/quot.t
+t/xs_doc.t
+t/xs_funcs.t
+t/xs_locale.t
+t/xs_quot.t
+t/xs_time.t

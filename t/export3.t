@@ -2,6 +2,7 @@
 
 use Test::More tests => 7;
 
+BEGIN { $Time::Format::NOXS = 1 }
 BEGIN { use_ok 'Time::Format', qw(%manip time_format time_manip) }
 
 # hashes exported properly?

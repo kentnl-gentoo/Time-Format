@@ -5,6 +5,7 @@
 use strict;
 use Test::More tests => 3;
 
+BEGIN { $Time::Format::NOXS = 1 }
 BEGIN { use_ok 'Time::Format', qw(:all) }
 my $err = 'Invalid call to Time::Format internal function';
 my $len = length $err;
