@@ -8,6 +8,8 @@ use Test::More tests => 26;
 BEGIN { use_ok 'Time::Format', qw(:all) }
 my $tl_notok;
 BEGIN { eval 'use Time::Local'; $tl_notok = $@? 1 : 0 }
+my $dm_notok;
+BEGIN { eval 'use Date::Manip'; $dm_notok = $@? 1 : 0; delete $INC{'Date/Manip.pm'} }
 
 # Were all variables imported? (3)
 is ref tied %time,     'Time::Format'   =>  '%time imported';
@@ -27,13 +29,16 @@ if ($@)
     ($Tuesday, $December, $Thursday, $Thu, $June, $Jun) = qw(Tuesday December Thursday Thu June Jun);
 }
 
+my $t;
+unless ($tl_notok)
+{
+    $t = timelocal(9, 58, 13, 5, 5, 103);    # June 5, 2003 at 1:58:09 pm
+    $t .= '.987654321';
+}
 
 SKIP:
 {
-    skip 22, 'Time::Local not available' if $tl_notok;
-
-    my $t = timelocal 9, 58, 13, 5, 5, 103;    # June 5, 2003 at 1:58:09 pm
-    $t .= '.987654321';
+    skip 'Time::Local not available', 22 if $tl_notok;
 
     # Synopsis tests (7)
     is "Today is $time{'yyyy/mm/dd',$t}", 'Today is 2003/06/05'   => 'Today';
@@ -45,7 +50,7 @@ SKIP:
     is "POSIXish: $strftime{'%A, %B %d, %Y', 0,0,0,12,11,95,2}", "POSIXish: $Tuesday, $December 12, 1995"   => 'POSIX 1';
     is "POSIXish: $strftime{'%A, %B %d, %Y', int $t}",       "POSIXish: $Thursday, $June 05, 2003"   => 'POSIX 2';
 
-    # Examples section (11)
+    # Examples section (12)
     is $time{'Weekday Month d, yyyy',$t},   "\u$Thursday \u$June 5, 2003"   => 'Example 1';
     is $time{'Day Mon d, yyyy',$t},         "\u$Thu \u$Jun 5, 2003"         => 'Example 2';
     is $time{'dd/mm/yyyy',$t},              "05/06/2003"                    => 'Example 3';
@@ -63,9 +68,12 @@ SKIP:
 
     is $strftime{'%A %B %e, %Y',$t},        "$Thursday $June  5, 2003"      => 'Example 12';
 
-    is $manip{'%m/%d/%Y',"epoch $t"},                       '06/05/2003'    => 'Example 13';
-    is $manip{'%m/%d/%Y','first monday in November 2000'},  '11/06/2000'    => 'Example 14';
-
-    # manip tests (1)
-    is qq[$time{'yyyymmdd',$manip{'%s',"epoch $t"}}],       '20030605'      => 'Example 15';
+    # manip tests (3)
+    SKIP:
+    {
+        skip 'Date::Manip not available', 3  if $dm_notok;
+        is $manip{'%m/%d/%Y',"epoch $t"},                       '06/05/2003'    => 'Example 13';
+        is $manip{'%m/%d/%Y','first monday in November 2000'},  '11/06/2000'    => 'Example 14';
+        is qq[$time{'yyyymmdd',$manip{'%s',"epoch $t"}}],       '20030605'      => 'Example 15';
+    }
 }

@@ -23,6 +23,10 @@ Revision history for Perl extension Time::Format.
 
 0.06  2003 June 20
         - Fix handling of "yyyy/mon".
-        - Minor documentation fixes.
+        - Minor documentation fixes (Thanks to Will Coleda!).
         - Add th/TH formatting codes.
         - Allow backslash escaping in format strings.
+
+0.07  2003 June 21
+        - Fix some bugs in the test suite -- NO changes to Format.pm
+          (Thanks to CPAN tester Jeroen Latour!)

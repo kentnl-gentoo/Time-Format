@@ -23,8 +23,8 @@ if ($@)
 
 SKIP:
 {
-    skip 86, 'Time::Local not available'  if $tl_notok;
-    my $t = timelocal 9, 58, 13, 5, 5, 103;    # June 5, 2003 at 1:58:09 pm
+    skip 'Time::Local not available', 86  if $tl_notok;
+    my $t = timelocal(9, 58, 13, 5, 5, 103);    # June 5, 2003 at 1:58:09 pm
     $t .= '.987654321';
 
     # Basic tests (40)
