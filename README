@@ -1,4 +1,4 @@
-Time/Format version 0.11
+Time/Format version 0.12
 ========================
 
 Time::Format provides a very easy way to format dates and times.  The
@@ -44,6 +44,10 @@ hasn't been used much in the Real World yet.  Thus it should be
 considered "beta" software.  When six months pass without any bugs
 being reported, or any features being added, I'll bump the version to
 1.0.
+
+If you find any bugs, or if any behavior of Time::Format surprises
+you, I would be grateful if you could send me an email message about
+it.  Thanks.
 
 
 INSTALLATION

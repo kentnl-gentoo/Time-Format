@@ -62,8 +62,8 @@ SKIP:
     is "POSIXish: $strftime{'%A, %B %d, %Y', int $t}",       "POSIXish: $Thursday, $June 05, 2003"   => 'POSIX 2';
 
     # Examples section (12)
-    is $time{'Weekday Month d, yyyy',$t},   "\u$Thursday \u$June 5, 2003"   => 'Example 1';
-    is $time{'Day Mon d, yyyy',$t},         "\u$Thu \u$Jun 5, 2003"         => 'Example 2';
+    is $time{'Weekday Month d, yyyy',$t},   "$Thursday $June 5, 2003"       => 'Example 1';
+    is $time{'Day Mon d, yyyy',$t},         "$Thu $Jun 5, 2003"             => 'Example 2';
     is $time{'dd/mm/yyyy',$t},              "05/06/2003"                    => 'Example 3';
     is $time{'yymmdd',$t},                  "030605"                        => 'Example 4';
     is $time{'dth of Month',$t},            "5th of $June"                  => 'Example 5';

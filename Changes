@@ -49,3 +49,11 @@ Revision history for Perl extension Time::Format.
 
 0.11  2003 July 7
         - Some changes for ActiveState Perl.  Thanks again to Will Coleda.
+
+0.12  2003 July 20
+        - Add \Q, \U, \L, \u, \l, \E handling in format strings.
+        - Change "Month" (etc) to be defined as "locale-preferred
+          capitalization" rather than "always ucfirst".  Thanks to
+          Mark Jason Dominus for his thoughts on this topic.
+        - Don't bother compiling the Perl routines until we know that
+          the XS routines (in Time::Format_XS) are not available.
