@@ -8,25 +8,81 @@ Time::Format - Easy-to-use date/time formatting.
 
 =head1 VERSION
 
-This documentation describes version 0.09 of Time::Format.pm, June 23, 2003.
+This documentation describes version 0.10 of Time::Format.pm, July 5, 2003.
 
 =cut
 
 use strict;
 package Time::Format;
-use Exporter;
 
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
-$VERSION = 0.09;
-@ISA = 'Exporter';
-@EXPORT      = qw(%time time_format);
-@EXPORT_OK   = qw(%time %strftime %manip time_format time_strftime time_manip);
-%EXPORT_TAGS = (all => \@EXPORT_OK);
+$Time::Format::VERSION = 0.10;
+my @EXPORT      = qw(%time time_format);
+my @EXPORT_OK   = qw(%time %strftime %manip time_format time_strftime time_manip);
+
+# Check whether optional XS module is installed
+eval { require Time::Format_XS };
+if (!$@  &&  defined &Time::Format_XS::time_format)
+{
+    *time_format = sub
+    {
+        my $fmt = shift;
+        my $time = (@_  &&  $_[0] ne 'time')? shift : _have('Time::HiRes')? Time::HiRes::time() : time;
+        Time::Format_XS::time_format($fmt, $time);
+    }
+}
 
 use vars qw(%time %strftime %manip);
 tie %time,     'Time::Format', \&time_format;
 tie %strftime, 'Time::Format', \&time_strftime;
 tie %manip,    'Time::Format', \&time_manip;
+
+sub import
+{
+    my $pkg  = shift;
+    my ($cpkg,$file,$line) = caller;
+    my @symbols;
+    if (@_)
+    {
+        if (grep $_ eq ':all', @_)
+        {
+            @symbols = (@EXPORT, @EXPORT_OK, grep $_ ne ':all', @_);
+        } else {
+            @symbols = @_;
+        }
+        my %seen;
+        @symbols = grep !$seen{$_}++, @symbols;
+    } else {
+        @symbols = @EXPORT;
+    }
+    my %ok;
+    @ok{@EXPORT_OK,@EXPORT} = ();
+    my @badsym = grep !exists $ok{$_}, @symbols;
+    if (@badsym)
+    {
+        my $s = @badsym>1? 's'   : '';
+        my $v = @badsym>1? 'are' : 'is';
+        die ("The symbol$s ", join(', ', @badsym), " $v not exported by Time::Format at $file line $line.\n");
+    }
+
+    no strict 'refs';
+    foreach my $sym (@symbols)
+    {
+        $sym =~ s/^([\$\&\@\%])?//;
+        my $pfx = $1;
+        my $calsym = $cpkg . '::' . $sym;
+        my $mysym  = $pkg  . '::' . $sym;
+        if ($pfx eq '%')
+        {
+            *$calsym = \%$mysym;
+        } elsif ($pfx eq '@') {
+            *$calsym = \@$mysym;
+        } elsif ($pfx eq '$') {
+            *$calsym = \$$mysym;
+        } else {
+            *$calsym = \&$mysym;
+        }
+    }
+}
 
 sub TIEHASH
 {
@@ -47,8 +103,8 @@ use subs qw(
  STORE    EXISTS    CLEAR    FIRSTKEY    NEXTKEY  );
 *STORE = *EXISTS = *CLEAR = *FIRSTKEY = *NEXTKEY = sub
 {
-    require Carp;
-    Carp::croak("Invalid call to Time::Format internal function");
+    my ($pkg,$file,$line) = caller;
+    die "Invalid call to Time::Format internal function at $file line $line.";
 };
 
 # Module finder
@@ -80,11 +136,10 @@ my $cache_size_limit = 256; # Max number of times to cache
 # Date/time pattern
 my $code_pat = qr/
                   (?<!\\)                      # Don't expand something preceded by backslash
-                  (?=[dDy?12hHsaApPMmWwutT])   # Jump to one of these characters
+                  (?=[dDy?hHsaApPMmWwutT])     # Jump to one of these characters
                   (
-                     Day|DAY|day               # Weekday abbreviation
+                     [Dd]ay|DAY                # Weekday abbreviation
                   |  yy(?:yy)?                 # Year
-                  |  [?12]m[oi]n               # backward-compatible Unambiguous month-minute codes
                   |  [?m]?m\{[oi]n\}           # new unambiguous month-minute codes
                   |  th | TH                   # day suffix
                   |  [?d]?d                    # Day
@@ -92,8 +147,8 @@ my $code_pat = qr/
                   |  [?H]?H                    # Hour (12)
                   |  [?s]?s                    # Second
                   |  [apAP]\.?[mM]\.?          # am and pm strings
-                  |  Mon(?:th)?|MON(?:TH)?|mon(?:th)?    # Month names and abbrev
-                  |  Weekday|WEEKDAY|weekday   # Weekday names
+                  |  [Mm]on(?:th)?|MON(?:TH)?  # Month names and abbrev
+                  |  [Ww]eekday|WEEKDAY        # Weekday names
                   |  mmm|uuuuuu                # millisecond and microsecond
                   |  tz                        # time zone
                   )/x;
@@ -167,8 +222,8 @@ sub _loctime
         $time = _have('Time::HiRes')? Time::HiRes::time() : time();
     }
     my $it = int $time;
-    my $msec = sprintf '%03d', int (0.5 +     1_000 * ($time - $it));
-    my $usec = sprintf '%06d', int (0.5 + 1_000_000 * ($time - $it));
+    my $msec = sprintf '%03d', int (    1_000 * ($time - $it));
+    my $usec = sprintf '%06d', int (1_000_000 * ($time - $it));
 
     setup_locale;
 
@@ -196,9 +251,6 @@ sub _loctime
     @th{qw[yyyy H  m{on}  d  h  m{in}  s  mmm uuuuuu tz]} = (    $t[5]+1900, $h12, @t[4,3,2,1,0], $msec, $usec, $tz);
     @th{qw[yy  HH mm{on} dd hh mm{in} ss]} = map $_<10?"0$_":$_, $t[5]%100,  $h12, @t[4,3,2,1,0];
     @th{qw[    ?H ?m{on} ?d ?h ?m{in} ?s]} = map $_<10?" $_":$_,             $h12, @t[4,3,2,1,0];
-
-    # temporary backwards compatibility -- this will go away in v1.0 (or maybe sooner)
-    @th{qw[2mon 2min 1mon 1min ?mon ?min]} = @th{qw[mm{on} mm{in} m{on} m{in} ?m{on} ?m{in}]};
 
     # AM/PM
     my $a = $h<12? 'a' : 'p';
@@ -259,6 +311,7 @@ sub time_format
     $fmt =~ tr/\\//d;
     return $fmt;
 }
+
 
 
 # POSIX strftime, for people who like those weird % formats.
@@ -367,6 +420,11 @@ For capabilities that C<%time> does not provide, C<%strftime> provides
 an interface to POSIX's C<strftime>, and C<%manip> provides an
 interface to the Date::Manip module's C<UnixDate> function.
 
+If the companion module Time::Format_XS is also installed,
+Time::Format will detect and use it.  This will result in a
+significant speed increase for C<%time> and C<time_format>.
+
+
 =head1 VARIABLES
 
 =over 4
@@ -376,9 +434,9 @@ interface to the Date::Manip module's C<UnixDate> function.
  $time{$format}
  $time{$format,$unixtime};
 
-Formats a unix time number according to the specified format.  If the
-time expression is omitted, the current time is used.  The format
-string may contain any of the following:
+Formats a unix time number (seconds since the epoch) according to the
+specified format.  If the time expression is omitted, the current time
+is used.  The format string may contain any of the following:
 
     yyyy       4-digit year
     yy         2-digit year
@@ -463,8 +521,8 @@ or "C<?m>" unambiguous.
 
 Note: Previous version of Time::Format (before v0.05) used the codes
 "C<2mon>", "C<1mon>", "C<?mon>", "C<2min>", "C<1min>", and "C<?min>"
-denote unambiguous months and minutes.  These codes are deprecated and
-will be removed before v1.0.
+denote unambiguous months and minutes.  These codes have been removed
+and are no longer supported.
 
 =item strftime
 
@@ -473,8 +531,8 @@ will be removed before v1.0.
  $strftime{$format}
 
 For those who prefer L<strftime(3)>'s weird % formats, or who need
-POSIX compliance.
-
+POSIX compliance, or who need week numbers or other features C<%time>
+does not provide.
 
 =item manip
 
@@ -529,9 +587,9 @@ time.
  manip($format,$when);
 
 This is a function interface to C<%manip>.  It calls
-Date::Manip::C<UnixDate> under the hood, but it has a slight advantage
-over calling C<UnixDate> directly, in that you can omit the C<$when>
-parameter in order to get the current time.
+Date::Manip::C<UnixDate> under the hood, but it has a very slight
+advantage over calling C<UnixDate> directly, in that you can omit the
+C<$when> parameter in order to get the current time.
 
 =back
 
@@ -609,13 +667,13 @@ Example:
 
 =head1 REQUIREMENTS
 
- Carp (included with Perl).
- Exporter (included with Perl).
  I18N::Langinfo, if you want non-English locales to work.
  POSIX, if you choose to use %strftime or want the C<tz> format to work.
  Time::HiRes, if you want the C<mmm> and C<uuuuuu> time formats to work.
  Date::Manip, if you choose to use %manip.
  Time::Local (only needed to run the 'make test' suite).
+ Time::Format_XS is optional but will make C<%time> and C<time_format>
+     much faster.
 
 =head1 AUTHOR / COPYRIGHT
 
@@ -634,9 +692,9 @@ a copy of your changes. Thanks.
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.2.2 (GNU/Linux)
 
-iD8DBQE+9zBKY96i4h5M0egRAh8zAKC0WQ83EWdr6ytKcB01UtHsOI8m1wCggCE4
-uWG4I6xTMTRdu4MZZR25fL4=
-=RJKD
+iD8DBQE/Bjf2Y96i4h5M0egRAkg0AJ9+bNhJIF5oU4Q5vYSArMYIPW5eMwCg2IjM
+EYcb5ASFCyIUWzsYF1kk7r4=
+=f5Jy
 -----END PGP SIGNATURE-----
 
 =end gpg

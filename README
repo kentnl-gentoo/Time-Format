@@ -1,4 +1,4 @@
-Time/Format version 0.09
+Time/Format version 0.10
 ========================
 
 Time::Format provides a very easy way to format dates and times.  The
@@ -39,10 +39,11 @@ which you can use if you prefer a function-based interface.
 
 DEVELOPMENT STATE
 
-Time::Format is a brand new module.  It has a decent test suite, but
-it hasn't been used much in the Real World yet.  Thus it should be
-considered "beta" software.  When six months pass without any bugs being
-reported, or any features being added, I'll bump the version to 1.0.
+Time::Format is a brand new module.  It has a good test suite, but it
+hasn't been used much in the Real World yet.  Thus it should be
+considered "beta" software.  When six months pass without any bugs
+being reported, or any features being added, I'll bump the version to
+1.0.
 
 
 INSTALLATION
@@ -59,12 +60,11 @@ DEPENDENCIES
 
 This module requires these other modules and libraries:
 
-  Carp
-  Exporter
   I18N::Langinfo (optional)
   POSIX          (optional)
   Time::HiRes    (optional)
   Date::Manip    (optional)
+  Test::More     (used by the test suite only)
   Time::Local    (used by the test suite only)
 
 

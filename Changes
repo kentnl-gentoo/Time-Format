@@ -39,3 +39,10 @@ Revision history for Perl extension Time::Format.
         - Add more checking on the Date::Manip module, which dies messily
           if it gets upset about not finding things like Time Zone.  This
           affects the test suite only -- No changes to Time::Format.
+
+0.10  2003 July 5
+        - Some speed improvements.  Removed need for Exporter, Carp.
+        - Add support for optional Time::Format_XS module.
+        - More test suite changes, due to strftime not being nearly as
+          standard as you'd think it would be.
+        - Removed support for deprecated month/minute codes.

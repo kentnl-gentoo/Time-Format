@@ -12,3 +12,6 @@ t/die.t
 t/doc.t
 t/funcs.t
 t/locale.t
+t/export1.t
+t/export2.t
+t/export3.t

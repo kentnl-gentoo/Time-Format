@@ -56,7 +56,7 @@ SKIP:
     is "Yesterday was $time{'yyyy/mm/dd', $t-24*60*60}", 'Yesterday was 2003/06/04'  => 'Yesterday';
     is "The time is $time{'hh:mm:ss',$t}", 'The time is 13:58:09'    => 'time';
     is "Another time is $time{'H:mm am', $t}", 'Another time is 1:58 pm'             => 'Another time';
-    is "Timestamp: $time{'yyyymmdd.hhmmss.mmm',$t}", 'Timestamp: 20030605.135809.988'   => 'Timestamp';
+    is "Timestamp: $time{'yyyymmdd.hhmmss.mmm',$t}", 'Timestamp: 20030605.135809.987'   => 'Timestamp';
 
     is "POSIXish: $strftime{'%A, %B %d, %Y', 0,0,0,12,11,95,2}", "POSIXish: $Tuesday, $December 12, 1995"   => 'POSIX 1';
     is "POSIXish: $strftime{'%A, %B %d, %Y', int $t}",       "POSIXish: $Thursday, $June 05, 2003"   => 'POSIX 2';
@@ -71,8 +71,8 @@ SKIP:
     is $time{'H:mm:ss am',$t},              "1:58:09 pm"                    => 'Example 6';
     is $time{'hh:mm:ss.uuuuuu',$t},         "13:58:09.987654"               => 'Example 7';
 
-    is $time{'yyyy/mm{on}/dd hh:mm{in}:ss.mmm',$t},   '2003/06/05 13:58:09.988'     => 'Example 8';
-    is $time{'yyyy/mm/dd hh:mm:ss.mmm',$t},           '2003/06/05 13:58:09.988'     => 'Example 9';
+    is $time{'yyyy/mm{on}/dd hh:mm{in}:ss.mmm',$t},   '2003/06/05 13:58:09.987'     => 'Example 8';
+    is $time{'yyyy/mm/dd hh:mm:ss.mmm',$t},           '2003/06/05 13:58:09.987'     => 'Example 9';
 
     is $time{"It's H:mm.",$t},              "It'9 1:58."                    => 'Example 10';
     is $time{"It'\\s H:mm.",$t},            "It's 1:58."                    => 'Example 11';

@@ -1,7 +1,7 @@
 #!/perl -I..
 
 use strict;
-use Test::More tests => 87;
+use Test::More tests => 78;
 
 BEGIN { use_ok 'Time::Format', qw(%time) }
 my $tl_notok;
@@ -23,16 +23,16 @@ if ($@)
 
 SKIP:
 {
-    skip 'Time::Local not available', 86  if $tl_notok;
+    skip 'Time::Local not available', 77  if $tl_notok;
     my $t = timelocal(9, 58, 13, 5, 5, 103);    # June 5, 2003 at 1:58:09 pm
     $t .= '.987654321';
 
-    # Basic tests (40)
+    # Basic tests (34)
     is $time{'yyyy',$t},      '2003'      => '4-digit year';
     is $time{'yy',$t},        '03'        => '2-digit year';
-    is $time{'yyyymmdd',$t},  '20030605'  => 'month: mm';
-    is $time{'yyyymdd',$t},   '2003605'   => 'month: m';
-    is $time{'yyyy?mdd',$t},  '2003 605'  => 'month: ?m';
+    is $time{'mm{on}',$t},    '06'        => 'month: mm';
+    is $time{'m{on}',$t},     '6'         => 'month: m';
+    is $time{'?m{on}',$t},    ' 6'        => 'month: ?m';
     is $time{'Month',$t},      $Month     => 'month name';
     is $time{'MONTH',$t},   uc $Month     => 'uc month name';
     is $time{'month',$t},   lc $Month     => 'lc month name';
@@ -54,16 +54,16 @@ SKIP:
     is $time{'HH',$t},        '01'        => '2-digit 12-hour';
     is $time{'H',$t},         '1'         => '1-digit 12-hour';
     is $time{'?H',$t},        ' 1'        => 'spaced 12-hour';
-    is $time{'hhmmss',$t},    '135809'    => 'm minute: 1';
-    is $time{'hh?mss',$t},    '135809'    => 'm minute: 2';
-    is $time{'hhmss',$t},     '135809'    => 'm minute: 3';
+    is $time{'mm{in}',$t},    '58'        => 'minute: mm';
+    is $time{'m{in}',$t},     '58'        => 'minute: m';
+    is $time{'?m{in}',$t},    '58'        => 'minute: ?m';
     is $time{'ss',$t},        '09'        => '2-digit second';
     is $time{'s',$t},         '9'         => '1-digit second';
     is $time{'?s',$t},        ' 9'        => 'spaced second';
-    is $time{'mmm',$t},       '988'       => 'millisecond';
+    is $time{'mmm',$t},       '987'       => 'millisecond';
     is $time{'uuuuuu',$t},    '987654'    => 'microsecond';
 
-    # am/pm tests
+    # am/pm tests (16)
     is $time{'am',$t},        'pm'        => 'am';
     is $time{'AM',$t},        'PM'        => 'AM';
     is $time{'pm',$t},        'pm'        => 'pm';
@@ -81,7 +81,7 @@ SKIP:
     is $time{'p.m.',$t-9999}, 'a.m.'      => 'p.m. 2';
     is $time{'P.M.',$t-9999}, 'A.M.'      => 'P.M. 2';
 
-    # ordinal suffix tests
+    # ordinal suffix tests (8)
     is $time{'dth',$t},        '5th'        => '5th';
     is $time{'dTH',$t},        '5TH'        => '5TH';
     is $time{'dth',$t-4*86400},'1st'        => '1st';
@@ -92,7 +92,7 @@ SKIP:
     is $time{'dth',$t+16*86400},'21st'      => '21st';
 
 
-    # Make sure 'm' guessing works reasonably well (17)
+    # Make sure 'm' guessing works reasonably well (18)
     is $time{'yyyymm',$t},    '200306'    => 'm test: year';
     is $time{'yymm',$t},      '0306'      => 'm test: year2';
     is $time{'mmdd',$t},      '0605'      => 'm test: day';
@@ -103,9 +103,7 @@ SKIP:
     is $time{'?d/mm',$t},     ' 5/06'     => 'm test: d/m';
     is $time{'?m/yyyy',$t},   ' 6/2003'   => 'm test: m/y';
     is $time{'m/yy',$t},      '6/03'      => 'm test: m/y2';
-
     is $time{'yyyy mon',$t},  '2003 jun'  => 'm test: year mon';
-
     is $time{'hhmm',$t},      '1358'      => 'm test: hour';
     is $time{'mmss',$t},      '5809'      => 'm test: sec';
     is $time{'hh:mm',$t},     '13:58'     => 'm test: hour:';
@@ -113,19 +111,6 @@ SKIP:
     is $time{'H:mm',$t},      '1:58'      => 'm test: Hour:';
     is $time{'HH:mm',$t},     '01:58'     => 'm test: hour12:';
     is $time{'?H:m',$t},      ' 1:58'     => 'm test: Hour12:';
-
-    # cases 'm' guessing can't handle (3)
-    is $time{'mm',$t},        'mm'        => '2-digit month/minute';
-    is $time{'m',$t},         'm'         => '1-digit month/minute';
-    is $time{'?m',$t},        '?m'        => 'spaced month/minute';
-
-    # unambiguous month/minute (6)
-    is $time{'2mon',$t},      '06'        => '2-digit u-month';
-    is $time{'1mon',$t},      '6'         => '1-digit u-month';
-    is $time{'?mon',$t},      ' 6'        => 'spaced u-month';
-    is $time{'2min',$t},      '58'        => '2-digit u-minute';
-    is $time{'1min',$t},      '58'        => '1-digit u-minute';
-    is $time{'?min',$t},      '58'        => 'spaced u-minute';
 
     # Current time value (1)
     # localtime seems always to return English day/month

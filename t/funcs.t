@@ -1,7 +1,7 @@
 #!/perl -I..
 
 use strict;
-use Test::More tests => 14;
+use Test::More tests => 15;
 
 BEGIN { use_ok 'Time::Format', qw(time_format time_strftime time_manip) }
 my $tl_notok;
@@ -33,7 +33,7 @@ eval
 {
     require I18N::Langinfo;
     I18N::Langinfo->import qw(langinfo DAY_3 MON_12 DAY_5 ABDAY_5 MON_6 ABMON_6);
-    ($Thursday, $Thu, $June, $Jun) = map langinfo($_), (DAY_5(), ABDAY_5(), MON_6(), ABMON_6());
+    ($Thursday, $Thu, $June, $Jun) = map ucfirst lc langinfo($_), (DAY_5(), ABDAY_5(), MON_6(), ABMON_6());
 };
 if ($@)
 {
@@ -42,7 +42,7 @@ if ($@)
 
 SKIP:
 {
-    skip 'Time::Local not available', 13  if $tl_notok;
+    skip 'Time::Local not available', 14  if $tl_notok;
     my $t = timelocal(9, 58, 13, 5, 5, 103);    # June 5, 2003 at 1:58:09 pm
     $t .= '.987654321';
 
@@ -52,14 +52,19 @@ SKIP:
     is time_format('MONTH',$t),    uc $June      => 'uc month name';
     is time_format('weekday',$t),  lc $Thursday  => 'lc weekday';
 
-    # time_strftime tests (4)
+    # time_strftime tests (5)
     SKIP:
     {
-        skip 'POSIX not available', 4  if $posix_bad;
+        skip 'POSIX not available', 5  if $posix_bad;
+
+        # Be sure to use ONLY ansi standard strftime codes here,
+        # otherwise the tests will fail on somebody's system somewhere.
+
         is time_strftime('%d',$t),      '05'        => 'day of month';
-        is time_strftime('%D',$t),      '06/05/03'  => '%D';
-        is time_strftime('%e',$t),      ' 5'        => 'spaced day';
+        is time_strftime('%m',$t),      '06'        => 'Month number';
+        is time_strftime('%M',$t),      '58'        => 'minute';
         is time_strftime('%H',$t),      '13'        => 'hour';
+        is time_strftime('%Y',$t),      '2003'      => 'year';
     }
 
     # time_manip tests (5)
