@@ -8,7 +8,7 @@ Time::Format - Easy-to-use date/time formatting.
 
 =head1 VERSION
 
-This documentation describes version 0.07 of Time::Format.pm, June 21, 2003.
+This documentation describes version 0.08 of Time::Format.pm, June 22, 2003.
 
 =cut
 
@@ -17,7 +17,7 @@ package Time::Format;
 use Exporter;
 
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
-$VERSION = 0.07;
+$VERSION = 0.08;
 @ISA = 'Exporter';
 @EXPORT      = qw(%time time_format);
 @EXPORT_OK   = qw(%time %strftime %manip time_format time_strftime time_manip);
@@ -634,9 +634,9 @@ a copy of your changes. Thanks.
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.2.2 (GNU/Linux)
 
-iD8DBQE+9NizY96i4h5M0egRAmG5AKDIoinycnP/63nShy4D8RjSGkCCpQCgi2MQ
-s6AuQn49+OIwbPR8+xkMzB0=
-=tuwY
+iD8DBQE+9gI/Y96i4h5M0egRAk9mAKDA3tHOYzXm3AZS1Wxr/04SJRv/cgCgwv6S
+bcqD288+aY7mNdPUPotNmfY=
+=bErU
 -----END PGP SIGNATURE-----
 
 =end gpg
