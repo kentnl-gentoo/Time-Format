@@ -1,4 +1,4 @@
-Time/Format version 0.03
+Time/Format version 0.04
 ========================
 
 Time::Format provides a very easy way to format dates and times.  The
@@ -8,6 +8,9 @@ codes used are meant to be easy to remember, use, and read.
 
 Also provided is a tied-hash interface to POSIX::strftime and
 Date::Manip::UnixDate.
+
+If the I18N::Langinfo module is available, Time::Format provides
+weekday and month names in a language appropriate for your locale.
 
 EXAMPLES
 
@@ -27,6 +30,9 @@ EXAMPLES
  $manip{'%m/%d/%Y'}               06/05/2003
  $manip{'%m/%d/%Y','yesterday'}   06/04/2003
  $manip{'%m/%d/%Y','first monday in November 2000'}  11/06/2000
+
+There are also corresponding functions for each of these hashes,
+which you can use if you prefer a function-based interface.
 
 
 DEVELOPMENT STATE
@@ -53,9 +59,11 @@ This module requires these other modules and libraries:
 
   Carp
   Exporter
+  I18N::Langinfo (optional)
   POSIX          (optional)
   Time::HiRes    (optional)
   Date::Manip    (optional)
+  Time::Local    (used by the test suite only)
 
 
 COPYRIGHT AND LICENSE

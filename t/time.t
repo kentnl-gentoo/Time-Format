@@ -7,6 +7,20 @@ BEGIN { use_ok 'Time::Format', qw(%time) }
 my $tl_notok;
 BEGIN { eval 'use Time::Local'; $tl_notok = $@? 1 : 0 }
 
+# Get day/month names in current locale
+my ($Weekday, $Day, $Month, $Mon);
+eval
+{
+    require I18N::Langinfo;
+    I18N::Langinfo->import qw(langinfo DAY_5 ABDAY_5 MON_6 ABMON_6);
+    ($Weekday, $Day, $Month, $Mon) = map ucfirst lc langinfo($_), (DAY_5(), ABDAY_5(), MON_6(), ABMON_6());
+};
+if ($@)
+{
+    ($Weekday, $Day, $Month, $Mon) = qw(Thursday Thu June Jun);
+}
+
+
 SKIP:
 {
     skip 69, 'Time::Local not available'  if $tl_notok;
@@ -19,21 +33,21 @@ SKIP:
     is $time{'yyyymmdd',$t},  '20030605'  => 'month: mm';
     is $time{'yyyymdd',$t},   '2003605'   => 'month: m';
     is $time{'yyyy?mdd',$t},  '2003 605'  => 'month: ?m';
-    is $time{'Month',$t},     'June'      => 'month name';
-    is $time{'MONTH',$t},     'JUNE'      => 'uc month name';
-    is $time{'month',$t},     'june'      => 'lc month name';
-    is $time{'Mon',$t},       'Jun'       => 'abbr month name';
-    is $time{'MON',$t},       'JUN'       => 'uc abbr month name';
-    is $time{'mon',$t},       'jun'       => 'lc abbr month name';
+    is $time{'Month',$t},      $Month     => 'month name';
+    is $time{'MONTH',$t},   uc $Month     => 'uc month name';
+    is $time{'month',$t},   lc $Month     => 'lc month name';
+    is $time{'Mon',$t},        $Mon       => 'abbr month name';
+    is $time{'MON',$t},     uc $Mon       => 'uc abbr month name';
+    is $time{'mon',$t},     lc $Mon       => 'lc abbr month name';
     is $time{'dd',$t},        '05'        => '2-digit day';
     is $time{'d',$t},         '5'         => '1-digit day';
     is $time{'?d',$t},        ' 5'        => 'spaced day';
-    is $time{'Weekday',$t},   'Thursday'  => 'weekday';
-    is $time{'WEEKDAY',$t},   'THURSDAY'  => 'uc weekday';
-    is $time{'weekday',$t},   'thursday'  => 'lc weekday';
-    is $time{'Day',$t},       'Thu'       => 'weekday abbr';
-    is $time{'DAY',$t},       'THU'       => 'uc weekday abbr';
-    is $time{'day',$t},       'thu'       => 'lc weekday abbr';
+    is $time{'Weekday',$t},    $Weekday   => 'weekday';
+    is $time{'WEEKDAY',$t}, uc $Weekday   => 'uc weekday';
+    is $time{'weekday',$t}, lc $Weekday   => 'lc weekday';
+    is $time{'Day',$t},        $Day       => 'weekday abbr';
+    is $time{'DAY',$t},     uc $Day       => 'uc weekday abbr';
+    is $time{'day',$t},     lc $Day       => 'lc weekday abbr';
     is $time{'hh',$t},        '13'        => '2-digit 24-hour';
     is $time{'h',$t},         '13'        => '1-digit 24-hour';
     is $time{'?h',$t},        '13'        => 'spaced 24-hour';
@@ -92,5 +106,18 @@ SKIP:
     is $time{'?min',$t},      '58'        => 'spaced u-minute';
 
     # Current time value (1)
-    is $time{'Day Mon ?d hh:mm:ss yyyy'}, scalar(localtime)  => 'current time';
+    # localtime seems always to return English day/month
+    my ($m,$d) = (localtime)[4,6];
+    my $mon = (qw(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec))[$m];
+    my $day = (qw(Sun Mon Tue Wed Thu Fri Sat))[$d];
+    is "$day $mon $time{'?d hh:mm:ss yyyy'}", scalar(localtime)  => 'current time';
+    #
+    # Note that there are two race conditions in the last section, above.
+    # 1: The day or month could change between the first localtime()
+    #         call and the second.
+    # 2: The time (especially the seconds) could change between the
+    #         %time call and the second localtime().
+    # The first is extremely rare; the second more frequent.
+
+    # Re-run the test suite if there is any doubt.
 }

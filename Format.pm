@@ -8,7 +8,7 @@ Time::Format - Easy-to-use date/time formatting.
 
 =head1 VERSION
 
-This documentation describes version 0.03 of Time::Format.pm, June 11, 2003.
+This documentation describes version 0.04 of Time::Format.pm, June 13, 2003.
 
 =cut
 
@@ -16,19 +16,17 @@ use strict;
 package Time::Format;
 use Exporter;
 
-use vars qw($VERSION @ISA @EXPORT_OK %EXPORT_TAGS);
-$VERSION = 0.03;
+use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
+$VERSION = 0.04;
 @ISA = 'Exporter';
-@EXPORT_OK   = qw(%time %strftime %manip);
+@EXPORT      = qw(%time time_format);
+@EXPORT_OK   = qw(%time %strftime %manip time_format time_strftime time_manip);
 %EXPORT_TAGS = (all => \@EXPORT_OK);
 
-my @Months   = qw/January February March April May June July August September October November December/;
-my @Weekdays = qw/Sunday Monday Tuesday Wednesday Thursday Friday Saturday/;
-
 use vars qw(%time %strftime %manip);
-tie %time,     'Time::Format', \&tf_time;
-tie %strftime, 'Time::Format', \&tf_strftime;
-tie %manip,    'Time::Format', \&tf_manip;
+tie %time,     'Time::Format', \&time_format;
+tie %strftime, 'Time::Format', \&time_strftime;
+tie %manip,    'Time::Format', \&time_manip;
 
 sub TIEHASH
 {
@@ -45,16 +43,91 @@ sub FETCH
     join $", $self->(@args);
 }
 
+use subs qw(
+ STORE    EXISTS    CLEAR    FIRSTKEY    NEXTKEY  );
 *STORE = *EXISTS = *CLEAR = *FIRSTKEY = *NEXTKEY = sub
 {
     require Carp;
     Carp::croak("Invalid call to Time::Format internal function");
 };
 
+# Module finder
+{
+    my %have;
+    sub _have
+    {
+        my $module = shift || return;
+        return $have{$module}  if exists $have{$module};
+        eval "use $module ()";
+        return $have{$module} = $@? 0 : 1;
+    }
+}
+
+
+# Default names for months, days
+my %english_names =
+(
+ Month    => [qw[January February March April May June July August September October November December]],
+ Weekday  => [qw[Sunday Monday Tuesday Wednesday Thursday Friday Saturday]],
+);
+my %names;
+my $locale;
+my %loc_cache;    # Cache for remembering times that have already been parsed out.
+
+# Internal function to initialize locale info
+sub setup_locale
+{
+    # Do nothing if locale has not changed since %names was set up.
+    my $locale_in_use;
+    $locale_in_use = POSIX::setlocale(POSIX::LC_TIME()) if _have('POSIX');
+    $locale_in_use = '' if  !defined $locale_in_use;
+    return if defined $locale  &&  $locale eq $locale_in_use;
+
+    my (@Month, @Mon, @Weekday, @Day);
+
+    eval {
+        require I18N::Langinfo;
+        I18N::Langinfo->import
+                qw(  MON_1   MON_2   MON_3   MON_4   MON_5   MON_6   MON_7   MON_8   MON_9   MON_10   MON_11   MON_12
+                     ABMON_1 ABMON_2 ABMON_3 ABMON_4 ABMON_5 ABMON_6 ABMON_7 ABMON_8 ABMON_9 ABMON_10 ABMON_11 ABMON_12
+                     DAY_1   DAY_2   DAY_3   DAY_4   DAY_5   DAY_6   DAY_7
+                     ABDAY_1 ABDAY_2 ABDAY_3 ABDAY_4 ABDAY_5 ABDAY_6 ABDAY_7
+                     langinfo);
+        @Month = map langinfo($_),   MON_1(),   MON_2(),   MON_3(),   MON_4(),    MON_5(),    MON_6(),
+                                     MON_7(),   MON_8(),   MON_9(),   MON_10(),   MON_11(),   MON_12();
+        @Mon   = map langinfo($_), ABMON_1(), ABMON_2(), ABMON_3(), ABMON_4(),  ABMON_5(),  ABMON_6(),
+                                   ABMON_7(), ABMON_8(), ABMON_9(), ABMON_10(), ABMON_11(), ABMON_12();
+        @Weekday = map langinfo($_),   DAY_1(),   DAY_2(),   DAY_3(),   DAY_4(),   DAY_5(),   DAY_6(),   DAY_7();
+        @Day     = map langinfo($_), ABDAY_1(), ABDAY_2(), ABDAY_3(), ABDAY_4(), ABDAY_5(), ABDAY_6(),  ABDAY_7();
+    };
+    if ($@)    # Internationalization didn't work for some reason; go with English.
+    {
+        @Month   = @{ $english_names{Month} };
+        @Weekday = @{ $english_names{Weekday} };
+        @Mon     = map substr($_,0,3), @Month;
+        @Day     = map substr($_,0,3), @Weekday;
+    }
+
+    # Store in %names, setting proper case
+    $names{Month}   = [map ucfirst lc, @Month];
+    $names{Weekday} = [map ucfirst lc, @Weekday];
+    $names{Mon}     = [map ucfirst lc, @Mon];
+    $names{Day}     = [map ucfirst lc, @Day];
+
+    foreach my $name (keys %names)
+    {
+        my $aref = $names{$name};
+        @$aref = map ucfirst lc, @$aref;       # mixed-case
+        $names{uc $name} = [map uc, @$aref];   # upper=case
+        $names{lc $name} = [map lc, @$aref];   # lower-case
+    }
+
+    %loc_cache = ();          # locale changes are rare.  Clear out cache.
+    $locale = $locale_in_use;
+}
+
 
 # Helper function -- returns localtime() hashref
-my %loc_cache;
-my ($checked_hires, $hires_ok);
 sub _loctime
 {
     my $time;
@@ -64,16 +137,13 @@ sub _loctime
     }
     else
     {
-        unless ($checked_hires)
-        {
-            eval 'use Time::HiRes';
-            $hires_ok = 1 unless $@;
-        }
-        $time = $hires_ok? Time::HiRes::time() : time();
+        $time = _have('Time::HiRes')? Time::HiRes::time() : time();
     }
     my $it = int $time;
     my $msec = sprintf '%03d', int (0.5 +     1_000 * ($time - $it));
     my $usec = sprintf '%06d', int (0.5 + 1_000_000 * ($time - $it));
+
+    setup_locale;
 
     # Cached, because I expect this'll be called on the same time values frequently.
     if (exists $loc_cache{$it})
@@ -100,17 +170,8 @@ sub _loctime
     $th{'a.m.'} = $th{'p.m.'} = $th{hh}<12? 'a.m.' : 'p.m.';
     @th{qw/AM PM A.M. P.M./} = map uc, @th{qw/am pm a.m. p.m./};
 
-    # Weekday name
-    $th{Weekday} = $Weekdays[$t[6]];
-    $th{WEEKDAY} = uc $th{Weekday};
-    $th{weekday} = lc $th{Weekday};
-    @th{qw/Day DAY day/} = map substr($_,0,3), @th{qw/Weekday WEEKDAY weekday/};
-
-    # Month name
-    $th{Month} = $Months[$t[4]-1];
-    $th{MONTH} = uc $th{Month};
-    $th{month} = lc $th{Month};
-    @th{qw/Mon MON mon/} = map substr($_,0,3), @th{qw/Month MONTH month/};
+    $th{$_} = $names{$_}[$t[6]]   for qw/Weekday WEEKDAY weekday Day DAY day/;
+    $th{$_} = $names{$_}[$t[4]-1] for qw/Month   MONTH   month   Mon MON mon/;
 
     # Date/time pattern
     $th{pat} = qr/(?=[dDy?12hHsaApPMmWwu])(?:Day|DAY|day|yy(?:yy)?|[?12]m[oi]n|[?d]?d|[?h]?h|[?H]?H|[?s]?s|[apAP]\.?[mM]\.?|Mon(?:th)?|MON(?:TH)?|mon(?:th)?|Weekday|WEEKDAY|weekday|mmm|uuuuuu)/;
@@ -123,7 +184,7 @@ my %disam;    # Disambiguator for 'm' format.
 my %dis2 = qw/mm 2 m 1 ?m ?/;
 $disam{$_} = "mon" foreach qw/yyyy yy d dd ?d/;           # If year or day is nearby, it's 'month'
 $disam{$_} = "min" foreach qw/h hh ?h H HH ?H s ss ?s/;   # If hour or second is nearby, it's 'minute'
-sub tf_time
+sub time_format
 {
     my $fmt  = shift;
     my $time = &_loctime;
@@ -138,16 +199,10 @@ sub tf_time
 
 
 # POSIX strftime, for people who like those weird % formats.
-my ($checked_posix, $have_posix);
-sub tf_strftime
+sub time_strftime
 {
     # Check if POSIX is available  (why wouldn't it be?)
-    unless ($checked_posix)
-    {
-        eval 'use POSIX';
-        $have_posix = 1 unless $@;
-    }
-    return 'NO_POSIX' unless $have_posix;
+    return 'NO_POSIX' unless _have('POSIX');
 
     my $fmt = shift;
     my @time;
@@ -168,15 +223,9 @@ sub tf_strftime
 
 
 # Date::Manip interface
-my ($checked_manip, $have_manip);
-sub tf_manip
+sub time_manip
 {
-    unless ($checked_manip)
-    {
-        eval 'use Date::Manip';
-        $have_manip = 1 unless $@;
-    }
-    return "NO_DATEMANIP" unless $have_manip;
+    return "NO_DATEMANIP" unless _have('Date::Manip');
 
     my $fmt  = shift;
     my $time = @_? shift : 'now';
@@ -206,6 +255,13 @@ __END__
  print "Date::Manip: $manip{'%m/%d/%Y'}\n";            # current time
  print "Date::Manip: $manip{'%m/%d/%Y','last Tuesday'}\n";
 
+ # These can also be used as standalone functions:
+ use Time::Format qw(time_format time_strftime time_manip);
+
+ print "Today is ", time_format('yyyy/mm/dd', $some_time), "\n";
+ print "POSIXish: ", time_strftime('%A %B %d, %Y',$some_time), "\n";
+ print "Date::Manip: ", time_manip('%m/%d/%Y',$some_time), "\n";
+
 =head1 DESCRIPTION
 
 This module creates global pseudovariables which format dates and
@@ -220,16 +276,16 @@ when that hash is being interpolated into a string.  See the
 "yesterday" example above.
 
 The C<%time> formatting codes are designed to be easy to remember and
-use, and to take up as many characters as the output time value
+use, and to take up just as many characters as the output time value
 whenever possible.  For example, the four-digit year code is
-"C<yyyy>".
+"C<yyyy>", the three-letter month abbreviation is "C<Mon>".
 
 The format strings are designed with programmers in mind.  What do you
 need most frequently?  4-digit year, month, day, 24-based hour,
 minute, second -- usually with leading zeroes.  These six are the
 easiest formats to use and remember in Time::Format: C<yyyy>, C<mm>,
 C<dd>, C<hh>, C<mm>, C<ss>.  Variants on these formats follow a simple
-and consistent formula.  This module is for everyone who is sick of
+and consistent formula.  This module is for everyone who is weary of
 trying to remember L<strftime(3)>'s arcane codes, or of endlessly
 writing C<$t[4]++; $t[5]+=1900>.
 
@@ -295,9 +351,9 @@ string may contain any of the following:
     m          minute, 0-59
     ?m         minute, 0-59 with leading space if < 10
     
-    ss         second, 00-60
-    s          second, 0-60
-    ?s         second, 0-60 with leading space if < 10
+    ss         second, 00-61
+    s          second, 0-61
+    ?s         second, 0-61 with leading space if < 10
     mmm        millisecond, 000-999
     uuuuuu     microsecond, 000000-999999
     
@@ -360,6 +416,47 @@ calls:
 
 =back
 
+=head1 FUNCTIONS
+
+=over 4
+
+=item time_format
+
+ time_format($format);
+ time_format($format, $unix_time);
+
+This is a function interface to C<%time>.  It accepts the same
+formatting codes and everything.  This is provided for people who want
+their function calls to I<look> like function calls, not hashes. :-)
+The following two are equivalent:
+
+ $x = $time{'yyyy/mm/dd'};
+ $x = time_format('yyyy/mm/dd');
+
+=item time_strftime
+
+ time_strftime($format, $sec,$min,$hour, $mday,$mon,$year, $wday,$yday,$isdst);
+ time_strftime($format, $unixtime);
+ time_strftime($format);
+
+This is a function interface to C<%strftime>.  It simply calls
+POSIX::C<strftime>, but it does provide a bit of an advantage over
+calling C<strftime> directly, in that you can pass the time as a unix
+time (seconds since the epoch), or omit it in order to get the current
+time.
+
+=item time_manip
+
+ manip($format);
+ manip($format,$when);
+
+This is a function interface to C<%manip>.  It calls
+Date::Manip::C<UnixDate> under the hood, but it has a slight advantage
+over calling C<UnixDate> directly, in that you can omit the C<$when>
+parameter in order to get the current time.
+
+=back
+
 =head1 EXAMPLES
 
  $time{'Weekday Month d, yyyy'}   Thursday June 5, 2003
@@ -380,14 +477,46 @@ calls:
  $manip{'%m/%d/%Y','first monday in November 2000'}  11/06/2000
 
 
+=head1 INTERNATIONALIZATION
+
+If the I18N::Langinfo module is available, Time::Format will return
+weekday and month names in the language appropriate for the current
+locale.  If not, English names will be used.
+
+Some testers have suggested making alternate hash variable names
+available for different languages.  Thus, for example, a French
+programmer could use C<%temps> instead of C<%time>, while a German
+could use C<%zeit>.  This would be nice, but would require
+Time::Format (and its author!)  to provide an equivalent to the word
+'time' in an arbitrary number of languages.
+
+Instead, I would recommend that non-English programmers provide an
+alias to C<%time> in their own preferred language.  This can be done
+by assigning C<\%time> to a typeglob:
+
+    # French
+    use Time::Format;
+    use vars '%temps';  *temps = \%time;
+
+    # German
+    use Time::Format;
+    use vars '%zeit';   *zeit = \%time;
+
+etc.
+
 =head1 EXPORTS
 
-The following symbols are available for import into your namespace.
-No symbols are exported by default.
+The following symbols are exported into your namespace by default:
 
  %time
+ time_format
+
+The following symbols are available for import into your namespace:
+
  %strftime
  %manip
+ time_strftime
+ time_manip
 
 The C<:all> tag will import all of these into your namespace.
 Example:
@@ -396,13 +525,13 @@ Example:
 
 =head1 REQUIREMENTS
 
- Carp (included with Perl)
- Exporter (included with Perl)
- POSIX, if you choose to use %strftime
- Time::HiRes, if you want the C<mmm> and C<uuuuuu> time formats to work
- Date::Manip, if you choose to use %manip
- Time::Local (only needed to run the 'make test' suite)
-
+ Carp (included with Perl).
+ Exporter (included with Perl).
+ I18N::Langinfo, if you want non-English locales to work.
+ POSIX, if you choose to use %strftime.
+ Time::HiRes, if you want the C<mmm> and C<uuuuuu> time formats to work.
+ Date::Manip, if you choose to use %manip.
+ Time::Local (only needed to run the 'make test' suite).
 
 =head1 AUTHOR / COPYRIGHT
 
@@ -421,9 +550,9 @@ a copy of your changes. Thanks.
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.2.2 (GNU/Linux)
 
-iD8DBQE+52SmY96i4h5M0egRApTQAJ9jyF8Hl3EP+jpO4xkBkQdxJEIDTQCeKRTK
-poxi0sAdqNSTPlptzrdErrg=
-=S0Yi
+iD8DBQE+6eYwY96i4h5M0egRArhfAKD7Is1I2JShF/D+ioEcGdbIVbOVmACfUCwC
+zf8xyGLpwRLL1snQrc96Gbs=
+=OQk9
 -----END PGP SIGNATURE-----
 
 =end gpg

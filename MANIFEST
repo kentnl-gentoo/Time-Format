@@ -8,3 +8,5 @@ t/strftime.t
 t/manip.t
 t/die.t
 t/doc.t
+t/funcs.t
+t/locale.t

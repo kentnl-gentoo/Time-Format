@@ -10,3 +10,8 @@ Revision history for Perl extension Time::Format.
 
 0.03  2003 June 11
         - Fix the tests to work in other time zones than my own!
+
+0.04  2003 June 13
+        - Add internationalization support (Month/weekday names).
+        - Expose underlying function interface to all hashes.
+        - Export %time and time_format by default.
