@@ -8,7 +8,7 @@ Time::Format - Easy-to-use date/time formatting.
 
 =head1 VERSION
 
-This documentation describes version 0.02 of Time::Format.pm, June 10, 2003.
+This documentation describes version 0.03 of Time::Format.pm, June 11, 2003.
 
 =cut
 
@@ -17,7 +17,7 @@ package Time::Format;
 use Exporter;
 
 use vars qw($VERSION @ISA @EXPORT_OK %EXPORT_TAGS);
-$VERSION = 0.02;
+$VERSION = 0.03;
 @ISA = 'Exporter';
 @EXPORT_OK   = qw(%time %strftime %manip);
 %EXPORT_TAGS = (all => \@EXPORT_OK);
@@ -401,6 +401,7 @@ Example:
  POSIX, if you choose to use %strftime
  Time::HiRes, if you want the C<mmm> and C<uuuuuu> time formats to work
  Date::Manip, if you choose to use %manip
+ Time::Local (only needed to run the 'make test' suite)
 
 
 =head1 AUTHOR / COPYRIGHT
@@ -420,9 +421,9 @@ a copy of your changes. Thanks.
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.2.2 (GNU/Linux)
 
-iD8DBQE+5h3uY96i4h5M0egRAs6XAJ9OaBDW+gZnYioxueRjuO74BXGu2QCcCa1I
-AnZEs/3MvTUf2xPo+BESqRo=
-=BvBs
+iD8DBQE+52SmY96i4h5M0egRApTQAJ9jyF8Hl3EP+jpO4xkBkQdxJEIDTQCeKRTK
+poxi0sAdqNSTPlptzrdErrg=
+=S0Yi
 -----END PGP SIGNATURE-----
 
 =end gpg

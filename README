@@ -1,10 +1,13 @@
-Time/Format version 0.02
+Time/Format version 0.03
 ========================
 
 Time::Format provides a very easy way to format dates and times.  The
 formatting functions are tied to hash variables, so they can be used
 inside strings as well as in ordinary expressions.  The formatting
 codes used are meant to be easy to remember, use, and read.
+
+Also provided is a tied-hash interface to POSIX::strftime and
+Date::Manip::UnixDate.
 
 EXAMPLES
 
@@ -30,7 +33,7 @@ DEVELOPMENT STATE
 
 Time::Format is a brand new module.  It has a decent test suite, but
 it hasn't been used much in the Real World yet.  Thus it should be
-considered "beta" software.  If six months pass without any bugs being
+considered "beta" software.  When six months pass without any bugs being
 reported, or any features being added, I'll bump the version to 1.0.
 
 
