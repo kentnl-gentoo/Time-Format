@@ -1,7 +1,7 @@
 #!/perl -I..
 
 use strict;
-use Test::More tests => 70;
+use Test::More tests => 87;
 
 BEGIN { use_ok 'Time::Format', qw(%time) }
 my $tl_notok;
@@ -23,7 +23,7 @@ if ($@)
 
 SKIP:
 {
-    skip 69, 'Time::Local not available'  if $tl_notok;
+    skip 86, 'Time::Local not available'  if $tl_notok;
     my $t = timelocal 9, 58, 13, 5, 5, 103;    # June 5, 2003 at 1:58:09 pm
     $t .= '.987654321';
 
@@ -62,6 +62,8 @@ SKIP:
     is $time{'?s',$t},        ' 9'        => 'spaced second';
     is $time{'mmm',$t},       '988'       => 'millisecond';
     is $time{'uuuuuu',$t},    '987654'    => 'microsecond';
+
+    # am/pm tests
     is $time{'am',$t},        'pm'        => 'am';
     is $time{'AM',$t},        'PM'        => 'AM';
     is $time{'pm',$t},        'pm'        => 'pm';
@@ -70,6 +72,24 @@ SKIP:
     is $time{'A.M.',$t},      'P.M.'      => 'A.M.';
     is $time{'p.m.',$t},      'p.m.'      => 'p.m.';
     is $time{'P.M.',$t},      'P.M.'      => 'P.M.';
+    is $time{'am',$t-9999},   'am'        => 'am 2';
+    is $time{'AM',$t-9999},   'AM'        => 'AM 2';
+    is $time{'pm',$t-9999},   'am'        => 'pm 2';
+    is $time{'PM',$t-9999},   'AM'        => 'PM 2';
+    is $time{'a.m.',$t-9999}, 'a.m.'      => 'a.m. 2';
+    is $time{'A.M.',$t-9999}, 'A.M.'      => 'A.M. 2';
+    is $time{'p.m.',$t-9999}, 'a.m.'      => 'p.m. 2';
+    is $time{'P.M.',$t-9999}, 'A.M.'      => 'P.M. 2';
+
+    # ordinal suffix tests
+    is $time{'dth',$t},        '5th'        => '5th';
+    is $time{'dTH',$t},        '5TH'        => '5TH';
+    is $time{'dth',$t-4*86400},'1st'        => '1st';
+    is $time{'dth',$t-3*86400},'2nd'        => '2nd';
+    is $time{'dth',$t-2*86400},'3rd'        => '3rd';
+    is $time{'dTH',$t-2*86400},'3RD'        => '3RD';
+    is $time{'dth',$t+6*86400},'11th'       => '11th';
+    is $time{'dth',$t+16*86400},'21st'      => '21st';
 
 
     # Make sure 'm' guessing works reasonably well (17)
@@ -83,6 +103,8 @@ SKIP:
     is $time{'?d/mm',$t},     ' 5/06'     => 'm test: d/m';
     is $time{'?m/yyyy',$t},   ' 6/2003'   => 'm test: m/y';
     is $time{'m/yy',$t},      '6/03'      => 'm test: m/y2';
+
+    is $time{'yyyy mon',$t},  '2003 jun'  => 'm test: year mon';
 
     is $time{'hhmm',$t},      '1358'      => 'm test: hour';
     is $time{'mmss',$t},      '5809'      => 'm test: sec';

@@ -3,7 +3,7 @@
 # Test examples in the docs, so we know we're not misleading anyone.
 
 use strict;
-use Test::More tests => 23;
+use Test::More tests => 26;
 
 BEGIN { use_ok 'Time::Format', qw(:all) }
 my $tl_notok;
@@ -30,7 +30,7 @@ if ($@)
 
 SKIP:
 {
-    skip 19, 'Time::Local not available' if $tl_notok;
+    skip 22, 'Time::Local not available' if $tl_notok;
 
     my $t = timelocal 9, 58, 13, 5, 5, 103;    # June 5, 2003 at 1:58:09 pm
     $t .= '.987654321';
@@ -46,22 +46,26 @@ SKIP:
     is "POSIXish: $strftime{'%A, %B %d, %Y', int $t}",       "POSIXish: $Thursday, $June 05, 2003"   => 'POSIX 2';
 
     # Examples section (11)
-    is $time{'Weekday Month d, yyyy',$t}, "\u$Thursday \u$June 5, 2003"   => 'Example 1';
-    is $time{'Day Mon d, yyyy',$t},       "\u$Thu \u$Jun 5, 2003"         => 'Example 2';
-    is $time{'dd/mm/yyyy',$t},            "05/06/2003"              => 'Example 3';
-    is $time{'yymmdd',$t},                "030605"                  => 'Example 4';
+    is $time{'Weekday Month d, yyyy',$t},   "\u$Thursday \u$June 5, 2003"   => 'Example 1';
+    is $time{'Day Mon d, yyyy',$t},         "\u$Thu \u$Jun 5, 2003"         => 'Example 2';
+    is $time{'dd/mm/yyyy',$t},              "05/06/2003"                    => 'Example 3';
+    is $time{'yymmdd',$t},                  "030605"                        => 'Example 4';
+    is $time{'dth of Month',$t},            "5th of $June"                  => 'Example 5';
 
-    is $time{'H:mm:ss am',$t},            "1:58:09 pm"              => 'Example 5';
-    is $time{'hh:mm:ss.uuuuuu',$t},       "13:58:09.987654"         => 'Example 6';
+    is $time{'H:mm:ss am',$t},              "1:58:09 pm"                    => 'Example 6';
+    is $time{'hh:mm:ss.uuuuuu',$t},         "13:58:09.987654"               => 'Example 7';
 
-    is $time{'yyyy/mm{on}/dd hh:mm{in}:ss.mmm',$t},   '2003/06/05 13:58:09.988'         => 'Example 7';
-    is $time{'yyyy/mm/dd hh:mm:ss.mmm',$t},       '2003/06/05 13:58:09.988'         => 'Example 8';
+    is $time{'yyyy/mm{on}/dd hh:mm{in}:ss.mmm',$t},   '2003/06/05 13:58:09.988'     => 'Example 8';
+    is $time{'yyyy/mm/dd hh:mm:ss.mmm',$t},           '2003/06/05 13:58:09.988'     => 'Example 9';
 
-    is $strftime{'%A %B %e, %Y',$t},        "$Thursday $June  5, 2003"         => 'Example 9';
+    is $time{"It's H:mm.",$t},              "It'9 1:58."                    => 'Example 10';
+    is $time{"It'\\s H:mm.",$t},            "It's 1:58."                    => 'Example 11';
 
-    is $manip{'%m/%d/%Y',"epoch $t"},               '06/05/2003'         => 'Example 9';
-    is $manip{'%m/%d/%Y','first monday in November 2000'},  '11/06/2000'         => 'Example 10';
+    is $strftime{'%A %B %e, %Y',$t},        "$Thursday $June  5, 2003"      => 'Example 12';
+
+    is $manip{'%m/%d/%Y',"epoch $t"},                       '06/05/2003'    => 'Example 13';
+    is $manip{'%m/%d/%Y','first monday in November 2000'},  '11/06/2000'    => 'Example 14';
 
     # manip tests (1)
-    is qq[$time{'yyyymmdd',$manip{'%s',"epoch $t"}}], '20030605',     'Example 11';
+    is qq[$time{'yyyymmdd',$manip{'%s',"epoch $t"}}],       '20030605'      => 'Example 15';
 }

@@ -2,7 +2,9 @@ Changes
 Makefile.PL
 MANIFEST
 README
+SIGNATURE
 Format.pm
+t/0-signature.t
 t/time.t
 t/strftime.t
 t/manip.t

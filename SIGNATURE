@@ -1,0 +1,36 @@
+This file contains message digests of all files listed in MANIFEST,
+signed via the Module::Signature module, version 0.22.
+
+To verify the content in this distribution, first make sure you have
+Module::Signature installed, then type:
+
+    % cpansign -v
+
+It would check each file's integrity, as well as the signature's
+validity.  If "==> Signature verified OK! <==" is not displayed,
+the distribution may already have been compromised, and you should
+not run its Makefile.PL or Build.PL.
+
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
+
+SHA1 a4410c0dad64b8da3e2a227a36f2a2ea21eeeaf1 Changes
+SHA1 3a61037ebc027057831b55d7a1dd8eaa7f9cfa98 Format.pm
+SHA1 81a8493f4cc9dba33c30b454319530245f4ec393 MANIFEST
+SHA1 a938c8faf359cb27d9a974599a4ccc5fc17188e0 Makefile.PL
+SHA1 cdc5d4ca531896d33b395bb8084e5de5e5193804 README
+SHA1 fa5807c950a0d17cf58ffde3f7dd6ab63025de5a t/0-signature.t
+SHA1 4d80d863a47e150d668728a126b3100556167af4 t/die.t
+SHA1 9977e38797e513fbcd76a6e407150171609b2b11 t/doc.t
+SHA1 c8b38a5fc32d230f20a9c4276673271097eec1b0 t/funcs.t
+SHA1 44dbeb81d0ed573bcf7710c9cad87b02aa5c66f0 t/locale.t
+SHA1 c5d5edd18363e0ff50b28f9e147f15317522a843 t/manip.t
+SHA1 731afebcf2791115d82827cf508ac4f507de1473 t/strftime.t
+SHA1 409477b624a7f0f9e0f487a134afe71efbded07f t/time.t
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.2.2 (GNU/Linux)
+
+iD8DBQE+8xEUY96i4h5M0egRAja7AKDd+8Nwti1zhgAVv/pNcK2vUJ+SLgCg+Zl+
+T2ufLSjaSyeT4u+yd78oWqU=
+=oF6z
+-----END PGP SIGNATURE-----

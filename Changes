@@ -20,3 +20,9 @@ Revision history for Perl extension Time::Format.
         - Add "tz" timezone format code to %time.
         - Change unambiguous month/minute format codes.
         - Some minor speed improvements.
+
+0.06  2003 June 20
+        - Fix handling of "yyyy/mon".
+        - Minor documentation fixes.
+        - Add th/TH formatting codes.
+        - Allow backslash escaping in format strings.
