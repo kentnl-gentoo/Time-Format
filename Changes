@@ -15,3 +15,8 @@ Revision history for Perl extension Time::Format.
         - Add internationalization support (Month/weekday names).
         - Expose underlying function interface to all hashes.
         - Export %time and time_format by default.
+
+0.05  2003 June 17
+        - Add "tz" timezone format code to %time.
+        - Change unambiguous month/minute format codes.
+        - Some minor speed improvements.

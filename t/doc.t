@@ -54,7 +54,7 @@ SKIP:
     is $time{'H:mm:ss am',$t},            "1:58:09 pm"              => 'Example 5';
     is $time{'hh:mm:ss.uuuuuu',$t},       "13:58:09.987654"         => 'Example 6';
 
-    is $time{'yyyy/2mon/dd hh:2min:ss.mmm',$t},   '2003/06/05 13:58:09.988'         => 'Example 7';
+    is $time{'yyyy/mm{on}/dd hh:mm{in}:ss.mmm',$t},   '2003/06/05 13:58:09.988'         => 'Example 7';
     is $time{'yyyy/mm/dd hh:mm:ss.mmm',$t},       '2003/06/05 13:58:09.988'         => 'Example 8';
 
     is $strftime{'%A %B %e, %Y',$t},        "$Thursday $June  5, 2003"         => 'Example 9';

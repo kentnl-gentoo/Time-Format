@@ -1,7 +1,7 @@
 #!/perl -I..
 
 use strict;
-use Test::More tests => 15;
+use Test::More tests => 14;
 
 BEGIN { use_ok 'Time::Format', qw(time_format time_strftime time_manip) }
 my $tl_notok;
@@ -26,7 +26,7 @@ if ($@)
 
 SKIP:
 {
-    skip 14, 'Time::Local not available'  if $tl_notok;
+    skip 13, 'Time::Local not available'  if $tl_notok;
     my $t = timelocal 9, 58, 13, 5, 5, 103;    # June 5, 2003 at 1:58:09 pm
     $t .= '.987654321';
 
@@ -36,11 +36,10 @@ SKIP:
     is time_format('MONTH',$t),    uc $June      => 'uc month name';
     is time_format('weekday',$t),  lc $Thursday  => 'lc weekday';
 
-    # time_strftime tests (5)
+    # time_strftime tests (4)
     SKIP:
     {
         skip 5, 'POSIX not available'  if $posix_bad;
-        is time_strftime('%C',$t),      '20'        => 'century';
         is time_strftime('%d',$t),      '05'        => 'day of month';
         is time_strftime('%D',$t),      '06/05/03'  => '%D';
         is time_strftime('%e',$t),      ' 5'        => 'spaced day';

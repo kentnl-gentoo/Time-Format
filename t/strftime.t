@@ -1,7 +1,7 @@
 #!/perl -I..
 
 use strict;
-use Test::More tests => 6;
+use Test::More tests => 5;
 
 BEGIN { use_ok 'Time::Format', qw(%strftime) }
 my $posix_bad = 0;
@@ -11,13 +11,12 @@ BEGIN { eval 'use Time::Local'; $tl_bad =1 if $@ }
 
 SKIP:
 {
-    skip 5, 'POSIX is not available'       if $posix_bad;
-    skip 5, 'Time::Local is not available' if $tl_bad;
+    skip 4, 'POSIX is not available'       if $posix_bad;
+    skip 4, 'Time::Local is not available' if $tl_bad;
 
     my $t = timelocal 9, 58, 13, 5, 5, 103;    # June 5, 2003 at 1:58:09 pm
     $t .= '.987654321';
 
-    is $strftime{'%C',$t},      '20'        => 'century';
     is $strftime{'%d',$t},      '05'        => 'day of month';
     is $strftime{'%D',$t},      '06/05/03'  => '%D';
     is $strftime{'%e',$t},      ' 5'        => 'spaced day';

@@ -1,4 +1,4 @@
-Time/Format version 0.04
+Time/Format version 0.05
 ========================
 
 Time::Format provides a very easy way to format dates and times.  The
@@ -18,14 +18,16 @@ EXAMPLES
  $time{'Day Mon d, yyyy'}         Thu Jun 5, 2003
  $time{'DAY MON d, yyyy'}         THU JUN 5, 2003
  $time{'dd/mm/yyyy'}              05/06/2003
- $time{yymd}                      030605
+ $time{yymmdd}                    030605
+ $time{'yymmdd',time-86400}       030604
 
  $time{'H:mm:ss am'}              1:02:14 pm
  $time{'hh:mm:ss.uuuuuu'}         13:02:14.171447
 
  $time{'yyyy/mm/dd hh:mm:ss.mmm'} 2003/06/05 13:02:14.171
 
- $strftime{'%A %B %e, %Y'}        Thursday June  5, 2003
+ $strftime{'%A %B %e, %Y'}             Thursday June  5, 2003
+ $strftime{'%A %B %e, %Y',time+86400}  Friday June  6, 2003
 
  $manip{'%m/%d/%Y'}               06/05/2003
  $manip{'%m/%d/%Y','yesterday'}   06/04/2003

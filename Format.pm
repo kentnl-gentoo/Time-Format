@@ -8,7 +8,7 @@ Time::Format - Easy-to-use date/time formatting.
 
 =head1 VERSION
 
-This documentation describes version 0.04 of Time::Format.pm, June 13, 2003.
+This documentation describes version 0.05 of Time::Format.pm, June 17, 2003.
 
 =cut
 
@@ -17,7 +17,7 @@ package Time::Format;
 use Exporter;
 
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
-$VERSION = 0.04;
+$VERSION = 0.05;
 @ISA = 'Exporter';
 @EXPORT      = qw(%time time_format);
 @EXPORT_OK   = qw(%time %strftime %manip time_format time_strftime time_manip);
@@ -40,7 +40,7 @@ sub FETCH
     my $self = shift;
     my $key  = shift;
     my @args = split $;, $key, -1;
-    join $", $self->(@args);
+    $self->(@args);
 }
 
 use subs qw(
@@ -72,7 +72,28 @@ my %english_names =
 );
 my %names;
 my $locale;
-my %loc_cache;    # Cache for remembering times that have already been parsed out.
+my %loc_cache;              # Cache for remembering times that have already been parsed out.
+my $cache_size=0;           # Number of keys in %loc_cache
+my $cache_size_limit = 256; # Max number of times to cache
+
+# Date/time pattern
+my $code_pat = qr/
+                  (?=[dDy?12hHsaApPMmWwut])    # Jump to one of these characters
+                  (
+                     Day|DAY|day               # Weekday abbreviation
+                  |  yy(?:yy)?                 # Year
+                  |  [?12]m[oi]n               # backward-compatible Unambiguous month-minute codes
+                  |  [?m]?m\{[oi]n\}           # new unambiguous month-minute codes
+                  |  [?d]?d                    # Day
+                  |  [?h]?h                    # Hour (24)
+                  |  [?H]?H                    # Hour (12)
+                  |  [?s]?s                    # Second
+                  |  [apAP]\.?[mM]\.?          # am and pm strings
+                  |  Mon(?:th)?|MON(?:TH)?|mon(?:th)?    # Month names and abbrev
+                  |  Weekday|WEEKDAY|weekday   # Weekday names
+                  |  mmm|uuuuuu                # millisecond and microsecond
+                  |  tz                        # time zone
+                  )/x;
 
 # Internal function to initialize locale info
 sub setup_locale
@@ -123,6 +144,7 @@ sub setup_locale
     }
 
     %loc_cache = ();          # locale changes are rare.  Clear out cache.
+    $cache_size = 0;
     $locale = $locale_in_use;
 }
 
@@ -154,46 +176,75 @@ sub _loctime
     }
 
     my @t = localtime int $time;
-    $t[4]++; $t[5]+=1900;
-    my $h12 = $t[2]>12? $t[2]-12 : ($t[2] || 12);
+    my ($h,$mx,$wx) = @t[2,4,6];    # Month, hour, Month, Weekday indexes.
+    $t[4]++;
+    my $h12 = $h>12? $h-12 : ($h || 12);
+    my $tz = _have('POSIX')? POSIX::strftime('%Z',@t) : '';
 
     # Populate a whole mess o' data elements
     my %th;
 
-    # year, month, day, hour, minute, second, millisecond, microsecon
-    @th{qw[yyyy 1mon d h 1min s H mmm uuuuuu]} = (@t[5,4,3,2,1,0], $h12, $msec, $usec);
-    @th{qw[yy 2mon dd hh HH 2min ss hh]} = map $_<10?"0$_":$_, $t[5]%100, @th{qw[1mon d h H 1min s]}, $t[2];
-    @th{qw[?mon ?d ?h ?H ?min ?s]} = map $_<10?" $_":$_, @th{qw[1mon d h H 1min s]};
+    # year, hour(12), month, day, hour, minute, second, millisecond, microsecond, time zone
+    @th{qw[yyyy H  m{on}  d  h  m{in}  s  mmm uuuuuu tz]} = (    $t[5]+1900, $h12, @t[4,3,2,1,0], $msec, $usec, $tz);
+    @th{qw[yy  HH mm{on} dd hh mm{in} ss]} = map $_<10?"0$_":$_, $t[5]%100,  $h12, @t[4,3,2,1,0];
+    @th{qw[    ?H ?m{on} ?d ?h ?m{in} ?s]} = map $_<10?" $_":$_,             $h12, @t[4,3,2,1,0];
+
+    # temporary backwards compatibility -- this will go away in v1.0 (or maybe sooner)
+    @th{qw[2mon 2min 1mon 1min ?mon ?min]} = @th{qw[mm{on} mm{in} m{on} m{in} ?m{on} ?m{in}]};
 
     # AM/PM
     $th{am}     = $th{pm}     = $th{hh}<12? 'am'   : 'pm';
     $th{'a.m.'} = $th{'p.m.'} = $th{hh}<12? 'a.m.' : 'p.m.';
     @th{qw/AM PM A.M. P.M./} = map uc, @th{qw/am pm a.m. p.m./};
 
-    $th{$_} = $names{$_}[$t[6]]   for qw/Weekday WEEKDAY weekday Day DAY day/;
-    $th{$_} = $names{$_}[$t[4]-1] for qw/Month   MONTH   month   Mon MON mon/;
+    $th{$_} = $names{$_}[$wx] for qw/Weekday WEEKDAY weekday Day DAY day/;
+    $th{$_} = $names{$_}[$mx] for qw/Month   MONTH   month   Mon MON mon/;
 
-    # Date/time pattern
-    $th{pat} = qr/(?=[dDy?12hHsaApPMmWwu])(?:Day|DAY|day|yy(?:yy)?|[?12]m[oi]n|[?d]?d|[?h]?h|[?H]?H|[?s]?s|[apAP]\.?[mM]\.?|Mon(?:th)?|MON(?:TH)?|mon(?:th)?|Weekday|WEEKDAY|weekday|mmm|uuuuuu)/;
-
+    # Don't let the time cache grow boundlessly.
+    if (++$cache_size == $cache_size_limit)
+    {
+        $cache_size = 0;
+        %loc_cache = ();
+    }
     return $loc_cache{$it} = \%th;
 }
 
 
 my %disam;    # Disambiguator for 'm' format.
-my %dis2 = qw/mm 2 m 1 ?m ?/;
-$disam{$_} = "mon" foreach qw/yyyy yy d dd ?d/;           # If year or day is nearby, it's 'month'
-$disam{$_} = "min" foreach qw/h hh ?h H HH ?H s ss ?s/;   # If hour or second is nearby, it's 'minute'
+$disam{$_} = "{on}" foreach qw/yyyy yy d dd ?d/;           # If year or day is nearby, it's 'month'
+$disam{$_} = "{in}" foreach qw/h hh ?h H HH ?H s ss ?s/;   # If hour or second is nearby, it's 'minute'
 sub time_format
 {
     my $fmt  = shift;
     my $time = &_loctime;
 
     # "Guess" how to interpret ambiguous 'm'
-    $fmt =~ s/((?=[ydhH?])(yy(?:yy)?|[?d]?d|[?h]?h|[?H]?H)[^?m]?)([?m]?m)/$1$dis2{$3}$disam{$2}/g;
-    $fmt =~ s/([?m]?m)(.?(?=[?dsy])([?d]?d|[?s]?s|yy(?:yy)?))/$dis2{$1}$disam{$3}$2/g;
+    $fmt =~ s/(                # $1 begins
+                (?=[ydhH?])    # Jump to one of these characters
+                (              # $2 begins.  Capture:
+                    yy(?:yy)?  #     a year
+                  | [?d]?d     #     a day
+                  | [?h]?h     #     an hour
+                  | [?H]?H     #     or an hour
+                )
+              [^?m]?           # Followed by something that's not part of a month
+              )
+              ([?m]?m)         # $3 is a month code
+              (?!m?\{[io]n\})  # make sure it's not already unambiguous
+             /$1$3$disam{$2}/gx;
 
-    $fmt =~ s/($time->{pat})/$time->{$1}/go;
+    $fmt =~ s/([?m]?m)        # $1 is a month code
+              (               # $2 begins.
+                 .?           #     0 or 1 characters
+                 (?=[?dsy])   #     Next char must be one of these
+                 (            #     $3 begins.  Capture:
+                    [?d]?d    #         a day
+                  | [?s]?s    #         a second
+                  | yy(?:yy)? #         or a year
+                 )
+              )/$1$disam{$3}$2/gx;
+
+    $fmt =~ s/$code_pat/$time->{$1}/go;
     return $fmt;
 }
 
@@ -245,7 +296,7 @@ __END__
  print "Today is $time{'yyyy/mm/dd'}\n";
  print "Yesterday was $time{'yyyy/mm/dd', time-24*60*60}\n";
  print "The time is $time{'hh:mm:ss'}\n";
- print "Another time is $time{'H:mm am', $another_time}\n";
+ print "Another time is $time{'H:mm am tz', $another_time}\n";
  print "Timestamp: $time{'yyyymmdd.hhmmss.mmm'}\n";
 
  print "POSIXish: $strftime{'%A, %B %d, %Y', 0,0,0,12,11,95,2}\n";
@@ -361,32 +412,43 @@ string may contain any of the following:
     pm   p.m.  same as "am" or "a.m."
     AM   A.M.  same as "am" or "a.m." but uppercase
     PM   P.M.  same as "AM" or "A.M."
+    
+    tz         time zone abbreviation
 
 Millisecond and microsecond require Time::HiRes, otherwise they'll
-always be zero.
+always be zero.  Timezone requires POSIX, otherwise it'll be the empty
+string.
 
 Anything in the format string other than the above patterns is left
 intact.
 
 For the most part, each of the above formatting codes takes up as much
 space as the output string it generates.  The exceptions are the codes
-whose output is variable length: C<Weekday>, C<Month>, and the
-single-character codes.
+whose output is variable length: C<Weekday>, C<Month>, time zone, and
+the single-character codes.
 
 Note that the "C<mm>", "C<m>", and "C<?m>" formats are ambiguous.
 C<%time> tries to guess whether you meant "month" or "minute" based on
 nearby characters in the format string.  Thus, a format of
-"C<yyyy/mm/dd hh:mm:ss>" is parsed as "year month day, hour minute
-second".  To remove the ambiguity, you can use the following codes:
+"C<yyyy/mm/dd hh:mm:ss>" is correctly parsed as "year month day, hour
+minute second".  To remove the ambiguity, you can use the following
+codes:
 
-    2mon       month, 01-31
-    1mon       month, 1-31
-    ?mon       month, 1-31 with leading space if < 10
+    mm{on}       month, 01-31
+    m{on}        month, 1-31
+    ?m{on}       month, 1-31 with leading space if < 10
     
-    2min       minute, 00-59
-    1min       minute, 0-59
-    ?min       minute, 0-59 with leading space if < 10
+    mm{in}       minute, 00-59
+    m{in}        minute, 0-59
+    ?m{in}       minute, 0-59 with leading space if < 10
 
+In other words, append "C<{on}>" or "C<{in}>" to make "C<mm>", "C<m>",
+or "C<?m>" unambiguous.
+
+Note: Previous version of Time::Format (before v0.05) used the codes
+"C<2mon>", "C<1mon>", "C<?mon>", "C<2min>", "C<1min>", and "C<?min>"
+denote unambiguous months and minutes.  These codes are deprecated and
+will be removed before v1.0.
 
 =item strftime
 
@@ -463,18 +525,20 @@ parameter in order to get the current time.
  $time{'Day Mon d, yyyy'}         Thu Jun 5, 2003
  $time{'dd/mm/yyyy'}              05/06/2003
  $time{yymmdd}                    030605
+ $time{'yymmdd',time-86400}       030604
 
  $time{'H:mm:ss am'}              1:02:14 pm
  $time{'hh:mm:ss.uuuuuu'}         13:02:14.171447
 
- $time{'yyyy/2mon/dd hh:2min:ss.mmm'}   2003/06/05 13:02:14.171
- $time{'yyyy/mm/dd hh:mm:ss.mmm'}       2003/06/05 13:02:14.171
+ $time{'yyyy/mm{on}/dd hh:mm{in}:ss.mmm'}  2003/06/05 13:02:14.171
+ $time{'yyyy/mm/dd hh:mm:ss.mmm'}          2003/06/05 13:02:14.171
 
- $strftime{'%A %B %e, %Y'}        Thursday June  5, 2003
+ $strftime{'%A %B %e, %Y'}                 Thursday June  5, 2003
+ $strftime{'%A %B %e, %Y',time+86400}      Friday June  6, 2003
 
- $manip{'%m/%d/%Y'}               06/05/2003
- $manip{'%m/%d/%Y','yesterday'}   06/04/2003
- $manip{'%m/%d/%Y','first monday in November 2000'}  11/06/2000
+ $manip{'%m/%d/%Y'}                                   06/05/2003
+ $manip{'%m/%d/%Y','yesterday'}                       06/04/2003
+ $manip{'%m/%d/%Y','first monday in November 2000'}   11/06/2000
 
 
 =head1 INTERNATIONALIZATION
@@ -485,7 +549,7 @@ locale.  If not, English names will be used.
 
 Some testers have suggested making alternate hash variable names
 available for different languages.  Thus, for example, a French
-programmer could use C<%temps> instead of C<%time>, while a German
+programmer could use C<%temps> instead of C<%time>, and a German
 could use C<%zeit>.  This would be nice, but would require
 Time::Format (and its author!)  to provide an equivalent to the word
 'time' in an arbitrary number of languages.
@@ -550,9 +614,9 @@ a copy of your changes. Thanks.
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.2.2 (GNU/Linux)
 
-iD8DBQE+6eYwY96i4h5M0egRArhfAKD7Is1I2JShF/D+ioEcGdbIVbOVmACfUCwC
-zf8xyGLpwRLL1snQrc96Gbs=
-=OQk9
+iD8DBQE+71WlY96i4h5M0egRAk/YAKDQ5dnWp6JwjXmuKo3O7O/9RXt65wCdGE2u
+1UVHSz7fDpw1xJZfH4dFy7k=
+=6oNJ
 -----END PGP SIGNATURE-----
 
 =end gpg
