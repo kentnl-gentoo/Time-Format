@@ -4,6 +4,8 @@ MANIFEST
 README
 SIGNATURE
 Format.pm
+Time-Format.ppd
+Time-Format-ppm.tar.gz
 t/0-signature.t
 t/time.t
 t/strftime.t

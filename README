@@ -1,4 +1,4 @@
-Time/Format version 0.10
+Time/Format version 0.11
 ========================
 
 Time::Format provides a very easy way to format dates and times.  The
@@ -26,8 +26,8 @@ EXAMPLES
 
  $time{'yyyy/mm/dd hh:mm:ss.mmm'} 2003/06/05 13:02:14.171
 
- $strftime{'%A %B %e, %Y'}             Thursday June  5, 2003
- $strftime{'%A %B %e, %Y',time+86400}  Friday June  6, 2003
+ $strftime{'%A %B %d, %Y'}             Thursday June 05, 2003
+ $strftime{'%A %B %d, %Y',time+86400}  Friday June 06, 2003
 
  $manip{'%m/%d/%Y'}               06/05/2003
  $manip{'%m/%d/%Y','yesterday'}   06/04/2003
@@ -55,17 +55,26 @@ To install this module, do the standard Perl module four-step:
    make test
    make install
 
+WINDOWS (ACTIVESTATE) USERS
+
+Version 0.11 fixes some problems ActiveState users had with
+installation.  Also, a ppm installation is now available.  This is
+still experimental, as the author is not experienced with the AS
+product.  Try the included PPD file.  It points to the Time::Format
+ppm file at CPAN.  The author would appreciate feedback on this. :-)
+
 
 DEPENDENCIES
 
 This module requires these other modules and libraries:
 
-  I18N::Langinfo (optional)
-  POSIX          (optional)
-  Time::HiRes    (optional)
-  Date::Manip    (optional)
-  Test::More     (used by the test suite only)
-  Time::Local    (used by the test suite only)
+  I18N::Langinfo  (optional)
+  POSIX           (optional)
+  Time::HiRes     (optional)
+  Date::Manip     (optional)
+  Time::Format_XS (optional)
+  Test::More      (used by the test suite only)
+  Time::Local     (used by the test suite only)
 
 
 COPYRIGHT AND LICENSE

@@ -77,7 +77,7 @@ SKIP:
     is $time{"It's H:mm.",$t},              "It'9 1:58."                    => 'Example 10';
     is $time{"It'\\s H:mm.",$t},            "It's 1:58."                    => 'Example 11';
 
-    is $strftime{'%A %B %e, %Y',$t},        "$Thursday $June  5, 2003"      => 'Example 12';
+    is $strftime{'%A %B %d, %Y',$t},        "$Thursday $June 05, 2003"      => 'Example 12';
 
     # manip tests (3)
     SKIP:

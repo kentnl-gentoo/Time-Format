@@ -46,3 +46,6 @@ Revision history for Perl extension Time::Format.
         - More test suite changes, due to strftime not being nearly as
           standard as you'd think it would be.
         - Removed support for deprecated month/minute codes.
+
+0.11  2003 July 7
+        - Some changes for ActiveState Perl.  Thanks again to Will Coleda.

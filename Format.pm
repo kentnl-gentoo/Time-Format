@@ -8,14 +8,14 @@ Time::Format - Easy-to-use date/time formatting.
 
 =head1 VERSION
 
-This documentation describes version 0.10 of Time::Format.pm, July 5, 2003.
+This documentation describes version 0.11 of Time::Format.pm, July 11, 2003.
 
 =cut
 
 use strict;
 package Time::Format;
 
-$Time::Format::VERSION = 0.10;
+$Time::Format::VERSION = '0.11';
 my @EXPORT      = qw(%time time_format);
 my @EXPORT_OK   = qw(%time %strftime %manip time_format time_strftime time_manip);
 
@@ -68,7 +68,7 @@ sub import
     foreach my $sym (@symbols)
     {
         $sym =~ s/^([\$\&\@\%])?//;
-        my $pfx = $1;
+        my $pfx = $1 || '&';
         my $calsym = $cpkg . '::' . $sym;
         my $mysym  = $pkg  . '::' . $sym;
         if ($pfx eq '%')
@@ -114,7 +114,12 @@ use subs qw(
     {
         my $module = shift || return;
         return $have{$module}  if exists $have{$module};
-        eval "use $module ()";
+
+        my $incmod = $module;
+        $incmod =~ s!::!/!g;
+        return $have{$module} = 1  if exists $INC{"$incmod.pm"};
+
+        eval "require $module";
         return $have{$module} = $@? 0 : 1;
     }
 }
@@ -132,26 +137,6 @@ my $locale;
 my %loc_cache;              # Cache for remembering times that have already been parsed out.
 my $cache_size=0;           # Number of keys in %loc_cache
 my $cache_size_limit = 256; # Max number of times to cache
-
-# Date/time pattern
-my $code_pat = qr/
-                  (?<!\\)                      # Don't expand something preceded by backslash
-                  (?=[dDy?hHsaApPMmWwutT])     # Jump to one of these characters
-                  (
-                     [Dd]ay|DAY                # Weekday abbreviation
-                  |  yy(?:yy)?                 # Year
-                  |  [?m]?m\{[oi]n\}           # new unambiguous month-minute codes
-                  |  th | TH                   # day suffix
-                  |  [?d]?d                    # Day
-                  |  [?h]?h                    # Hour (24)
-                  |  [?H]?H                    # Hour (12)
-                  |  [?s]?s                    # Second
-                  |  [apAP]\.?[mM]\.?          # am and pm strings
-                  |  [Mm]on(?:th)?|MON(?:TH)?  # Month names and abbrev
-                  |  [Ww]eekday|WEEKDAY        # Weekday names
-                  |  mmm|uuuuuu                # millisecond and microsecond
-                  |  tz                        # time zone
-                  )/x;
 
 # Internal function to initialize locale info
 sub setup_locale
@@ -307,7 +292,26 @@ sub time_format
                  )
               )/$1$disam{$3}$2/gx;
 
-    $fmt =~ s/$code_pat/$time->{$1}/go;
+    # The Big Date/Time Pattern
+    $fmt =~ s/
+              (?<!\\)                      # Don't expand something preceded by backslash
+              (?=[dDy?hHsaApPMmWwutT])     # Jump to one of these characters
+              (
+                 [Dd]ay|DAY                # Weekday abbreviation
+              |  yy(?:yy)?                 # Year
+              |  [?m]?m\{[oi]n\}           # Unambiguous month-minute codes
+              |  th | TH                   # day suffix
+              |  [?d]?d                    # Day
+              |  [?h]?h                    # Hour (24)
+              |  [?H]?H                    # Hour (12)
+              |  [?s]?s                    # Second
+              |  [apAP]\.?[mM]\.?          # am and pm strings
+              |  [Mm]on(?:th)?|MON(?:TH)?  # Month names and abbrev
+              |  [Ww]eekday|WEEKDAY        # Weekday names
+              |  mmm|uuuuuu                # millisecond and microsecond
+              |  tz                        # time zone
+             )/$time->{$1}/gx;
+
     $fmt =~ tr/\\//d;
     return $fmt;
 }
@@ -611,8 +615,8 @@ C<$when> parameter in order to get the current time.
  $time{"It's H:mm."}              It'14 1:02.    # OOPS!
  $time{"It'\\s H:mm."}            It's 1:02.     # Backslash fixes it.
 
- $strftime{'%A %B %e, %Y'}                 Thursday June  5, 2003
- $strftime{'%A %B %e, %Y',time+86400}      Friday June  6, 2003
+ $strftime{'%A %B %d, %Y'}                 Thursday June 05, 2003
+ $strftime{'%A %B %d, %Y',time+86400}      Friday June 06, 2003
 
  $manip{'%m/%d/%Y'}                                   06/05/2003
  $manip{'%m/%d/%Y','yesterday'}                       06/04/2003
@@ -692,9 +696,9 @@ a copy of your changes. Thanks.
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.2.2 (GNU/Linux)
 
-iD8DBQE/Bjf2Y96i4h5M0egRAkg0AJ9+bNhJIF5oU4Q5vYSArMYIPW5eMwCg2IjM
-EYcb5ASFCyIUWzsYF1kk7r4=
-=f5Jy
+iD8DBQE/DsIaY96i4h5M0egRAuETAKCe0IaFOAkJMW4XIzH8VY4KlXuWzQCfccDO
+DYhTJ//4jUbHQPELwjKRQQ8=
+=h+07
 -----END PGP SIGNATURE-----
 
 =end gpg
