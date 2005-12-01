@@ -8,7 +8,7 @@ Time::Format - Easy-to-use date/time formatting.
 
 =head1 VERSION
 
-This documentation describes version 1.01 of Time::Format.pm, December 1, 2005.
+This documentation describes version 1.02 of Time::Format.pm, December 1, 2005.
 
 =cut
 
@@ -16,11 +16,11 @@ use strict;
 package Time::Format;
 use vars qw($VERSION %XSCOMPAT $NOXS);
 
-$VERSION  = '1.01';
+$VERSION  = '1.02';
 
 # This module claims to be compatible with the following versions
 # of Time::Format_XS.
-%XSCOMPAT = map {$_ => 1} qw(1.01);
+%XSCOMPAT = map {$_ => 1} qw(1.01 1.02);
 
 sub _croak
 {
@@ -1106,9 +1106,9 @@ message.
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.1 (Cygwin)
 
-iD8DBQFDjz4GY96i4h5M0egRApy4AKDCxjxol64CvUTFKxEUwt4mm5ahvACdGa2Y
-GwX96E0lGOvAcd4mjRruWjw=
-=hs6/
+iD8DBQFDj0C6Y96i4h5M0egRAgX/AJ9iG4sAWgdo9u2ZcY8IJWFErptYsACfV1Ah
+PUuWJvTBkiLmk45tfHnpPKY=
+=Wpkw
 -----END PGP SIGNATURE-----
 
 =end gpg

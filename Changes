@@ -72,3 +72,7 @@ Revision history for Perl extension Time::Format.
 
 1.01  2005 December 1
         - Support for DateTime, Date::Manip, and ISO 8601 strings.
+
+1.02  2005 December 1
+        - No changes. Had to increment the number because of a PAUSE
+          upload problem.
