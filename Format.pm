@@ -8,19 +8,31 @@ Time::Format - Easy-to-use date/time formatting.
 
 =head1 VERSION
 
-This documentation describes version 1.00 of Time::Format.pm, September 24, 2004.
+This documentation describes version 1.01 of Time::Format.pm, December 1, 2005.
 
 =cut
 
 use strict;
 package Time::Format;
+use vars qw($VERSION %XSCOMPAT $NOXS);
 
-$Time::Format::VERSION  = '1.00';
-%Time::Format::XSCOMPAT = map {$_ => 1} qw/0.13 1.00/;   # Compatible with these versions of Time::Format_XS.
+$VERSION  = '1.01';
 
+# This module claims to be compatible with the following versions
+# of Time::Format_XS.
+%XSCOMPAT = map {$_ => 1} qw(1.01);
+
+sub _croak
+{
+    require Carp;
+    goto &Carp::croak;
+}
+
+# Here we go through a bunch of tests to decide whether we can use the
+# XS module, or if we need to load and compile the perl-only
+# subroutines (which are stored in __DATA__).
 my $load_perlonly = 0;
-
-$load_perlonly = 1 if defined $Time::Format::NOXS  &&  $Time::Format::NOXS;
+$load_perlonly = 1  if defined $NOXS  &&  $NOXS;
 
 if (!$load_perlonly)
 {
@@ -33,24 +45,22 @@ if (!$load_perlonly)
     }
     else
     {
-        unless ($Time::Format::XSCOMPAT{$Time::Format_XS::VERSION}     # We know we're compatible with them
-            or  $Time::Format_XS::PLCOMPAT{$Time::Format::VERSION})    # they know they're compatible with us
+        # Check that we're compatible with them (backwards compatibility)
+        # or they're compatible with us (forwards compatibility).
+        unless ($XSCOMPAT{$Time::Format_XS::VERSION}
+            ||  $Time::Format_XS::PLCOMPAT{$VERSION})
         {
-            warn "Time::Format_XS version ($Time::Format_XS::VERSION) " .
-                 "is not compatible with Time::Format version ($Time::Format::VERSION).\n" .
-                 "Using Perl-only functions.\n";
+            warn "Your Time::Format_XS version ($Time::Format_XS::VERSION) "
+               . "is not compatible with Time::Format version ($VERSION).\n"
+               . "Using Perl-only functions.\n";
             $load_perlonly = 1;
         }
     }
 
+    # Okay to use the XS version?  Great.  Wrap it.
     if (!$load_perlonly)
     {
-        *time_format = sub
-        {
-            my $fmt = shift;
-            my $time = (@_  &&  $_[0] ne 'time')? shift : _have('Time::HiRes')? Time::HiRes::time() : time;
-            Time::Format_XS::time_format($fmt, $time);
-        }
+        *time_format = \&Time::Format_XS::time_format;
     }
 }
 
@@ -59,15 +69,15 @@ if ($load_perlonly)
     # Time::Format_XS not installed, or version mismatch, or NOXS was set.
     # The perl routines will need to be loaded.
     # But defer this until someone actually calls time_format().
-    *time_format_perlonly = sub
+    *time_format = sub
     {
         local $^W = 0;    # disable warning about subroutine redefined
         local $/ = undef;
         eval <DATA>;
         die if $@;
-        goto &time_format_perlonly;
+        *time_format = \&time_format_perlonly;
+        goto &time_format;
     };
-    *time_format = sub { goto &time_format_perlonly };
     undef $Time::Format_XS::VERSION;    # Indicate that XS version is not available.
 }
 
@@ -102,7 +112,7 @@ sub import
     {
         my $s = @badsym>1? 's'   : '';
         my $v = @badsym>1? 'are' : 'is';
-        die ("The symbol$s ", join(', ', @badsym), " $v not exported by Time::Format at $file line $line.\n");
+        _croak ("The symbol$s ", join(', ', @badsym), " $v not exported by Time::Format at $file line $line.\n");
     }
 
     no strict 'refs';
@@ -133,9 +143,12 @@ sub import
 # character is a $, then Perl joins the values with $;.  This makes it
 # easy to simulate function calls with tied hashes -- we just split on
 # $; to recreate the argument list.
+#
+# 2005/12/01: We must ensure that time_format gets two arguments, since
+# the XS version cannot handle variable argument lists.
 
 use vars qw(%time %strftime %manip);
-tie %time,     'Time::Format', \&time_format;
+tie %time,     'Time::Format', sub { push @_, 'time' if @_ == 1;  goto &time_format};
 tie %strftime, 'Time::Format', \&time_strftime;
 tie %manip,    'Time::Format', \&time_manip;
 
@@ -159,11 +172,11 @@ use subs qw(
 *STORE = *EXISTS = *CLEAR = *FIRSTKEY = *NEXTKEY = sub
 {
     my ($pkg,$file,$line) = caller;
-    die "Invalid call to Time::Format internal function at $file line $line.";
+    _croak "Invalid call to Time::Format internal function at $file line $line.";
 };
 
 
-# Module finder
+# Module finder -- do we have the specified module available?
 {
     my %have;
     sub _have
@@ -218,6 +231,7 @@ sub time_manip
     return Date::Manip::UnixDate($time, $fmt);
 }
 
+
 1;
 __DATA__
 # The following is only compiled if Time::Format_XS is not available.
@@ -232,11 +246,12 @@ my %english_names =
 );
 my %names;
 my $locale;
-my %loc_cache;              # Cache for remembering times that have already been parsed out.
-my $cache_size=0;           # Number of keys in %loc_cache
-my $cache_size_limit = 256; # Max number of times to cache
+my %loc_cache;                # Cache for remembering times that have already been parsed out.
+my $cache_size=0;             # Number of keys in %loc_cache
+my $cache_size_limit = 1024;  # Max number of times to cache
 
 # Internal function to initialize locale info.
+# Returns true if the locale changed.
 sub setup_locale
 {
     # Do nothing if locale has not changed since %names was set up.
@@ -289,60 +304,134 @@ sub setup_locale
     %loc_cache = ();          # locale changes are rare.  Clear out cache.
     $cache_size = 0;
     $locale = $locale_in_use;
+
+    return 1;
 }
 
+# Types of time values we can handle:
+my $NUMERIC_TIME      = \&decode_epoch;
+my $DATETIME_OBJECT   = \&decode_DateTime_object;
+my $DATETIME_STRING   = \&decode_DateTime_string;
+# my $DATEMANIP_STRING  = \&decode_DateManip_string;
+
+# What kind of argument was passed to time_format?
+# Returns (type, time, cache_time_key, milliseconds, microseconds)
+sub _classify_time
+{
+    my $timeval = shift;
+    $timeval = 'time' if !defined $timeval;
+
+    my $frac;  # Fractional seconds, if any
+    my $cache_value;    # 1/20 of 1 cent
+    my $time_type;
+
+    # DateTime object?
+    if (UNIVERSAL::isa($timeval, 'DateTime'))
+    {
+        $cache_value = "$timeval";    # stringify
+        $frac        = $timeval->nanosecond() / 1e9;
+        $time_type   = $DATETIME_OBJECT;
+    }
+    # Stringified DateTime object
+    # Except we make it more flexible by allowing the date OR the time to be specfied
+    # This will also match Date::Manip strings, and many ISO-8601 strings.
+    elsif ($timeval =~ m{\A(   (?!>\d{6,8}\z)                # string must not consist of only 6 or 8 digits.
+                          (?:
+                            \d{4} [-/.]? \d{2} [-/.]? \d{2}  # year-month-day
+                          )?                                 # ymd is optional
+                          (?:  (?<=\d)  [T_ ]  (?=\d) )?     # separator: T or _ or space, but only if ymd and hms both present
+                        )                                    # End of $1: YMD and separator
+                          (?:                                # hms is optional
+                        (
+                            \d{2} [:.]? \d{2} [:.]? \d{2}    # hour:minute:second
+                        )                                    # End of $2: HMS
+                            (?: [,.] (\d+))?                 # optional fraction
+                          )?                                 # end of optional (HMS.fraction)
+                        \z
+                      }x)
+    {
+        $cache_value = ($1 || q{}) . ($2 || q{});
+        $frac        = $3? '0.' . $3 : 0;
+        $time_type   = $DATETIME_STRING;
+    }
+    # Numeric time?
+    elsif ($timeval =~ /^\s* (  (\d+) (?:[.,](\d+))?  )  $/x)
+    {
+        $timeval     = $1;
+        $cache_value = $2;
+        $frac        = $3? '0.' . $3 : 0;
+        $time_type   = $NUMERIC_TIME;
+    }
+    # Not set, or set to 'time' string
+    elsif ($timeval eq 'time'  ||  $timeval eq q{})
+    {
+        # Get numeric time
+        $timeval     = _have('Time::HiRes')? Time::HiRes::time() : time;
+        $cache_value = int $timeval;
+        $frac        = $cache_value - $timeval;
+        $time_type   = $NUMERIC_TIME;
+    }
+    else
+    {
+        # User passed us something we don't know how to handle.
+        _croak qq{Unrecognized time value: "$timeval"};
+    }
+    # We messed up.
+    die qq{Illegal time type "$time_type"; programming error in Time::Format. Contact author.}
+        if !defined &$time_type;
+
+    # Calculate millisecond, microsecond from fraction
+    # msec and usec are TRUNCATED, not ROUNDED, because rounding up
+    # to the next higher second would be a nightmare.
+    my $msec = sprintf '%03d', int (    1_000 * $frac);
+    my $usec = sprintf '%06d', int (1_000_000 * $frac);
+
+    return ($time_type, $timeval, $cache_value, $msec, $usec);
+}
 
 # Helper function -- returns localtime() hashref
 sub _loctime
 {
-    my $time;
-    if (@_  &&  $_[0] ne 'time')
-    {
-        $time = shift;
-    }
-    else
-    {
-        $time = _have('Time::HiRes')? Time::HiRes::time() : time();
-    }
-    my $it = int $time;
-    my $msec = sprintf '%03d', int (    1_000 * ($time - $it));
-    my $usec = sprintf '%06d', int (1_000_000 * ($time - $it));
-
-    setup_locale;
+    my ($decode, $time, $cachekey, $msec, $usec) = _classify_time(@_);
+    my $locale_changed = setup_locale;
 
     # Cached, because I expect this'll be called on the same time values frequently.
-    if (exists $loc_cache{$it})
+    die "Programming error: undefined cache value. Contact Time::Format author."
+        if !defined $cachekey;
+
+    # If locale has changed, can't use the cached value.
+    if (!$locale_changed  &&  exists $loc_cache{$cachekey})
     {
-        my $h = $loc_cache{$it};
-        @$h{qw/mmm uuuuuu/} = ($msec, $usec);
+        my $h = $loc_cache{$cachekey};
+        ($h->{mmm}, $h->{uuuuuu}) = ($msec, $usec);
         return $h;
     }
 
-    my @t = localtime $it;
-    my ($h,$d,$mx,$wx) = @t[2,3,4,6];    # Month, hour, Month, Weekday indexes.
-    $t[4]++;
-    my $h12 = $h>12? $h-12 : ($h || 12);
-    my $tz = _have('POSIX')? POSIX::strftime('%Z',@t) : '';
+    # Hour-12, time zone, localtime parts, decoded from input
+    my ($h12, $tz, @time_parts) = $decode->($time);
 
     # Populate a whole mess o' data elements
     my %th;
+    my $m0 = $time_parts[4] - 1;   # zero-based month
+    $tz ||= _have('POSIX')? POSIX::strftime('%Z',@time_parts) : q{};
 
     # NOTE: When adding new codes, be wary of adding any that interfere
     # with the user's ability to use the words "at", "on", or "of" literally.
 
     # year, hour(12), month, day, hour, minute, second, millisecond, microsecond, time zone
-    @th{qw[yyyy H  m{on}  d  h  m{in}  s  mmm uuuuuu tz]} = (    $t[5]+1900, $h12, @t[4,3,2,1,0], $msec, $usec, $tz);
-    @th{qw[yy  HH mm{on} dd hh mm{in} ss]} = map $_<10?"0$_":$_, $t[5]%100,  $h12, @t[4,3,2,1,0];
-    @th{qw[    ?H ?m{on} ?d ?h ?m{in} ?s]} = map $_<10?" $_":$_,             $h12, @t[4,3,2,1,0];
+    @th{qw[yyyy H  m{on}  d  h  m{in}  s  mmm uuuuuu tz]} = (    $time_parts[5],      $h12, @time_parts[4,3,2,1,0], $msec, $usec, $tz);
+    @th{qw[yy  HH mm{on} dd hh mm{in} ss]} = map $_<10?"0$_":$_, $time_parts[5]%100,  $h12, @time_parts[4,3,2,1,0];
+    @th{qw[    ?H ?m{on} ?d ?h ?m{in} ?s]} = map $_<10?" $_":$_,                      $h12, @time_parts[4,3,2,1,0];
 
     # AM/PM
+    my ($h,$d,$wx) = @time_parts[2,3,6];  # Day, weekday index
     my $a = $h<12? 'a' : 'p';
     $th{am}     = $th{pm}     = $a . 'm';
     $th{'a.m.'} = $th{'p.m.'} = $a . '.m.';
     @th{qw/AM PM A.M. P.M./} = map uc, @th{qw/am pm a.m. p.m./};
 
     $th{$_} = $names{$_}[$wx] for qw/Weekday WEEKDAY weekday Day DAY day/;
-    $th{$_} = $names{$_}[$mx] for qw/Month   MONTH   month   Mon MON mon/;
+    $th{$_} = $names{$_}[$m0] for qw/Month   MONTH   month   Mon MON mon/;
     $th{$_} = $names{$_}[$d]  for qw/th TH/;
 
     # Don't let the time cache grow boundlessly.
@@ -351,8 +440,92 @@ sub _loctime
         $cache_size = 0;
         %loc_cache = ();
     }
-    return $loc_cache{$it} = \%th;
+    return $loc_cache{$cachekey} = \%th;
 }
+
+sub decode_DateTime_object
+{
+    my $dt = shift;
+
+    my @t = ($dt->hour_12, $dt->time_zone_short_name,
+             $dt->second,  $dt->minute, $dt->hour,
+             $dt->day,     $dt->month,  $dt->year,
+             $dt->day_of_week);
+    $t[-1] = 0 if $t[-1] == 7;   # Convert 1-7 (Mon-Sun) to 0-6 (Sun-Sat).
+
+    return @t;
+}
+
+# 2005-10-31T15:14:39
+sub decode_DateTime_string
+{
+    my $dts = shift;
+    unless ($dts =~ m{\A (?!>\d{6,8}\z)                        # string must not consist of only 6 or 8 digits.
+                        (?:
+                         (\d{4}) [-/.]? (\d{2}) [-/.]? (\d{2}) # year-month-day
+                        )?                                     # ymd is optional, but next must not be digit
+                      (?:  (?<=\d)  [T_ ]  (?=\d) )?           # separator: T or _ or space, but only if ymd and hms both present
+                      (?:                                      # hms is optional
+                         (\d{2}) [:.]? (\d{2}) [:.]? (\d{2})    # hour:minute:second
+                         (?: [,.] \d+)?                        # optional fraction (ignored in this sub)
+                      )?   \z
+                     }x)
+    {
+        # This "should" never happen, since we checked the format of
+        # the string already.
+        die qq{Unrecognized DateTime string "$dts": probable Time::Format bug};
+    }
+
+    my ($y,$mon,$d,$h,$min,$s) = ($1,$2,$3,$4,$5,$6);
+    $y   ||= 1969;
+    $mon ||=   12;
+    $d   ||=   31;
+    $h   ||=    0;
+    $min ||=    0;
+    $s   ||=    0;
+    my @t = map {$_+0} ($s,$min,$h,$d,$mon,$y);   # +0 is to force numeric (remove leading zeroes)
+    my $h12  = $h == 0? 12
+             : $h > 12? $h - 12
+             :          $h;
+    push @t, _dow($y, $mon, $d);
+    return ($h12, undef, @t);
+}
+
+sub decode_epoch
+{
+    my $time = shift;   # Assumed to be an epoch time integer
+
+    my @t = localtime $time;
+    my $h = $t[2];    # Hour (24), Month index
+    $t[4]++;
+    $t[5] += 1900;
+    my $h12 = $h>12? $h-12 : ($h || 12);
+
+    return ($h12, undef, @t);
+}
+
+#  $int = dow ($year, $month, $day);
+#
+# Returns the day of the week (0=Sunday .. 6=Saturday).  Uses Zeller's
+# congruence, so it is't subject to the unix 2038 limitation.
+#
+#--->     $int = dow ($year, $month, $day);
+sub _dow
+{
+    my ($Y, $M, $D) = @_;
+
+    $M -= 2;
+    if ($M < 1)
+    {
+        $M += 12;
+        $Y--;
+    }
+    my $C = int($Y/100);
+    $Y %= 100;
+
+    return (int((26*$M - 2)/10) + $D + $Y + int($Y/4) + int($C/4) - 2*$C) % 7;
+}
+
 
 # The heart of the module.  Didja ever see so many wicked regexes in a row?
 
@@ -362,7 +535,7 @@ $disam{$_} = "{in}" foreach qw/h hh ?h H HH ?H s ss ?s/;   # If hour or second i
 sub time_format_perlonly
 {
     my $fmt  = shift;
-    my $time = &_loctime;
+    my $time = _loctime(@_);
 
     # Remove \Q...\E sequences
     my $rc;
@@ -400,7 +573,7 @@ sub time_format_perlonly
                  )
               )/$1$disam{$3}$2/gx;
 
-    # The Big Date/Time Pattern
+    # The Big Date/Time Pattern of Death
     $fmt =~ s/
               (?<!\\)                      # Don't expand something preceded by backslash
               (?=[dDy?hHsaApPMmWwutT])     # Jump to one of these characters
@@ -456,7 +629,7 @@ sub time_format_perlonly
         {
             return $rcode unless index($str, $rcode) >= 0;
         }
-        die "Time::Format cannot process string: no unique characters left.";
+        _croak "Time::Format cannot process string: no unique characters left.";
     }
 
     sub remember
@@ -492,6 +665,28 @@ __END__
  print "Another time is $time{'H:mm am tz', $another_time}\n";
  print "Timestamp: $time{'yyyymmdd.hhmmss.mmm'}\n";
 
+C<%time> also accepts Date::Manip strings and DateTime objects:
+
+ $dm = Date::Manip::ParseDate('last monday');
+ print "Last monday was $time{'Month d, yyyy', $dm}";
+ $dt = DateTime->new (....);
+ print "Here's another date: $time{'m/d/yy', $dt}";
+
+It also accepts most ISO-8601 date/time strings:
+
+ $t = '2005/10/31T17:11:09';   # date separator: / or - or .
+ $t = '2005-10-31 17.11.09';   # in-between separator: T or _ or space
+ $t = '20051031_171109';       # time separator: : or .
+ $t = '20051031171109';        # separators may be omitted
+ $t = '2005/10/31';            # date-only is okay
+ $t = '17:11:09';              # time-only is okay
+ # But not:
+ $t = '20051031';              # date-only without separators
+ $t = '171109';                # time-only without separators
+ # ...because those look like epoch time numbers.
+
+C<%strftime> works like POSIX's C<strftime>, if you like those C<%>-formats.
+
  $strftime{$format}
  $strftime{$format, $unixtime}
  $strftime{$format, $sec,$min,$hour, $mday,$mon,$year, $wday,$yday,$isdst}
@@ -500,13 +695,16 @@ __END__
  print "POSIXish: $strftime{'%A, %B %d, %Y', 1054866251}\n";
  print "POSIXish: $strftime{'%A, %B %d, %Y'}\n";       # current time
 
+C<%manip> works like Date::Manip's C<UnixDate> function.
+
  $manip{$format};
- $manip{$format,$when};
+ $manip{$format, $when};
 
  print "Date::Manip: $manip{'%m/%d/%Y'}\n";            # current time
  print "Date::Manip: $manip{'%m/%d/%Y','last Tuesday'}\n";
 
- # These can also be used as standalone functions:
+These can also be used as standalone functions:
+
  use Time::Format qw(time_format time_strftime time_manip);
 
  print "Today is ", time_format('yyyy/mm/dd', $some_time), "\n";
@@ -557,7 +755,7 @@ For capabilities that C<%time> does not provide, C<%strftime> provides
 an interface to POSIX's C<strftime>, and C<%manip> provides an
 interface to the Date::Manip module's C<UnixDate> function.
 
-If the companion module Time::Format_XS is also installed,
+If the companion module L<Time::Format_XS> is also installed,
 Time::Format will detect and use it.  This will result in a
 significant speed increase for C<%time> and C<time_format>.
 
@@ -568,11 +766,13 @@ significant speed increase for C<%time> and C<time_format>.
 =item time
 
  $time{$format}
- $time{$format,$unixtime};
+ $time{$format,$time_value};
 
-Formats a unix time number (seconds since the epoch) according to the
-specified format.  If the time expression is omitted, the current time
-is used.  The format string may contain any of the following:
+Formats a unix time number (seconds since the epoch), DateTime object,
+stringified DateTime, Date::Manip string, or ISO-8601 string,
+according to the specified format.  If the time expression is omitted,
+the current time is used.  The format string may contain any of the
+following:
 
     yyyy       4-digit year
     yy         2-digit year
@@ -666,20 +866,15 @@ To remove the ambiguity, you can use the following codes:
 In other words, append "C<{on}>" or "C<{in}>" to make "C<m>", "C<mm>",
 or "C<?m>" unambiguous.
 
-Note: Previous version of Time::Format (before v0.05) used the codes
-"C<2mon>", "C<1mon>", "C<?mon>", "C<2min>", "C<1min>", and "C<?min>"
-to denote unambiguous months and minutes.  These codes have been
-removed and are no longer supported.
-
 =item strftime
 
  $strftime{$format, $sec,$min,$hour, $mday,$mon,$year, $wday,$yday,$isdst}
  $strftime{$format, $unixtime}
  $strftime{$format}
 
-For those who prefer I<strftime(3)>'s weird % formats, or who need
-POSIX compliance, or who need week numbers or other features C<%time>
-does not provide.
+For those who prefer L<strftime|POSIX/strftime>'s weird % formats, or
+who need POSIX compliance, or who need week numbers or other features
+C<%time> does not provide.
 
 =item manip
 
@@ -688,14 +883,13 @@ does not provide.
 
 Provides an interface to the Date::Manip module's C<UnixDate>
 function.  This function is rather slow, but can parse a very wide
-variety of date input.  See the Date::Manip module for details
+variety of date input.  See the L<Date::Manip> module for details
 about the inputs accepted.
 
 If you want to use the C<%time> codes, but need the input flexibility
-of C<%manip>, you can use Date::Manip's C<%s> format and nest the
-calls:
+of C<%manip>, you can use Date::Manip's C<ParseDate> function:
 
- print "$time{'yyyymmdd',$manip{'%s','last sunday'}}";
+ print "$time{'yyyymmdd', ParseDate('last sunday')}";
 
 =back
 
@@ -854,8 +1048,6 @@ assigning C<\%time> to a typeglob:
     use vars '%zeit';   *zeit = \%time;
     print "Heutiger Tag ist $zeit{'d.m.yyyy'}\n";
 
-etc.
-
 =head1 EXPORTS
 
 The following symbols are exported into your namespace by default:
@@ -901,18 +1093,22 @@ limitation.
 
 Eric J. Roode, roode@cpan.org
 
-Copyright (c) 2003-2004 by Eric J. Roode. All Rights Reserved.
+Copyright (c) 2003-2005 by Eric J. Roode. All Rights Reserved.
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
+
+To avoid my spam filter, please include "Perl", "module", or this
+module's name in the message's subject line, and/or GPG-sign your
+message.
 
 =begin gpg
 
 -----BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.2.4 (Cygwin)
+Version: GnuPG v1.4.1 (Cygwin)
 
-iD8DBQFBVFR5Y96i4h5M0egRAjjXAJ9W80HgtzB7y3jDcPjRTPtmu32RYgCghTUX
-oGcjgc+O6/vb4Q9mlaQm2bg=
-=o0rP
+iD8DBQFDjz4GY96i4h5M0egRApy4AKDCxjxol64CvUTFKxEUwt4mm5ahvACdGa2Y
+GwX96E0lGOvAcd4mjRruWjw=
+=hs6/
 -----END PGP SIGNATURE-----
 
 =end gpg

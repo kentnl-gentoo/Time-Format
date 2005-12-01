@@ -2,16 +2,16 @@ Changes
 Makefile.PL
 MANIFEST
 README
-SIGNATURE
 Format.pm
 Time-Format.ppd
 Time-Format-ppm.tar.gz
 quickref.txt
 quickref.ps
-t/0-signature.t
 t/time.t
 t/strftime.t
 t/manip.t
+t/DateTime.t
+t/DateManip.t
 t/die.t
 t/doc.t
 t/funcs.t
@@ -20,6 +20,8 @@ t/export1.t
 t/export2.t
 t/export3.t
 t/quot.t
+t/string.t
+t/xs_DateTime.t
 t/xs_doc.t
 t/xs_funcs.t
 t/xs_locale.t

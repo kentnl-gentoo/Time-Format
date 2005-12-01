@@ -1,7 +1,7 @@
 Quick reference for Time::Format formatting codes.
 
 $time{$format}
-$time{$format, $unixtime}
+$time{$format, $time_value}
 
 Numbers:
     yyyy       4-digit year

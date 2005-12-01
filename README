@@ -1,5 +1,5 @@
-Time/Format version 1.00
-========================
+Time::Format version 1.01
+=========================
 
 Time::Format provides a very easy way to format dates and times.  The
 formatting functions are tied to hash variables, so they can be used
@@ -9,6 +9,9 @@ follow a simple, consistent pattern.  If I've done my job right, once
 you learn the codes, you should never have to refer to the
 documentation again.  A quick-reference page is included, just in
 case.  ;-)
+
+Time::Format can also format DateTime objects, and strings created
+with Date::Manip.
 
 Also provided is a tied-hash interface to POSIX::strftime and
 Date::Manip::UnixDate.
@@ -45,12 +48,10 @@ There are also corresponding functions for each of these hashes, which
 you can use if you prefer (or need) a function-based interface.
 
 
-DEVELOPMENT STATE
+CHANGES SINCE v1.00
 
-No bug reports or feature requests have been submitted in the twelve
-months since v0.13 was released; therefore it seems safe to up the
-version number to 1.00 and call it "released" -- either there are no
-serious bugs, or nobody's using the module!
+Support added for DateTime objects, DateTime stringifications, and
+Date::Manip strings.
 
 If you find any bugs, or if any behavior of Time::Format surprises
 you, I would be grateful if you could send me an email message about
@@ -66,18 +67,9 @@ To install this module, do the standard Perl module four-step:
    make test
    make install
 
-WINDOWS (ACTIVESTATE) USERS
-
-Versions 0.11 and 0.13 fix some problems ActiveState users had with
-installation.  Also, a ppm installation is now available.  This is
-still experimental, as the author is not experienced with the AS
-product.  Try the included PPD file.  It points to the Time::Format
-ppm file at CPAN.  The author would appreciate feedback on this. :-)
-
-
 DEPENDENCIES
 
-This module requires these other modules and libraries:
+This module can use these other modules and libraries:
 
   I18N::Langinfo  (optional)
   POSIX           (optional)
@@ -92,6 +84,10 @@ COPYRIGHT AND LICENSE
 
 Eric J. Roode, roode@cpan.org
 
-Copyright (c) 2003-2004 by Eric J. Roode. All Rights Reserved.
+Copyright (c) 2003-2005 by Eric J. Roode. All Rights Reserved.
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
+
+To avoid my spam filter, please include "Perl", "module", or this
+module's name in the message's subject line, and/or GPG-sign your
+message.

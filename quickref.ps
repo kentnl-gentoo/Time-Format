@@ -25,7 +25,7 @@ ti-font setfont
 code-font setfont
 left-x y moveto ($time{$format}) show
 fs downby
-left-x y moveto ($time{$format, $unixtime}) show
+left-x y moveto ($time{$format, $time_value}) show
 fs downby
 fs downby
 
@@ -207,7 +207,7 @@ desc-font setfont    col2-x y moveto    (time zone abbreviation) show
 
 right-x copy-y moveto
 copy-font setfont
-(Copyright (c) 2003 by Eric J. Roode.  All rights reserved.)
+(Copyright (c) 2003-2005 by Eric J. Roode.  All rights reserved.)
 dup stringwidth pop neg 0 rmoveto show
 
 showpage
