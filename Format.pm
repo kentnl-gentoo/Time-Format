@@ -8,7 +8,7 @@ Time::Format - Easy-to-use date/time formatting.
 
 =head1 VERSION
 
-This documentation describes version 1.02 of Time::Format.pm, December 1, 2005.
+This documentation describes version 1.03 of Time::Format.pm, March 24, 2008.
 
 =cut
 
@@ -16,7 +16,7 @@ use strict;
 package Time::Format;
 use vars qw($VERSION %XSCOMPAT $NOXS);
 
-$VERSION  = '1.02';
+$VERSION  = '1.03';
 
 # This module claims to be compatible with the following versions
 # of Time::Format_XS.
@@ -573,7 +573,7 @@ sub time_format_perlonly
                  )
               )/$1$disam{$3}$2/gx;
 
-    # The Big Date/Time Pattern of Death
+    # The Big Date/Time Pattern of Doom
     $fmt =~ s/
               (?<!\\)                      # Don't expand something preceded by backslash
               (?=[dDy?hHsaApPMmWwutT])     # Jump to one of these characters
@@ -831,7 +831,7 @@ circumstances (leap seconds, if your system supports such).
 
 Anything in the format string other than the above patterns is left
 intact.  Any character preceded by a backslash is left alone and
-not used for any part of a format code.  See the L<QUOTING> section
+not used for any part of a format code.  See the L</QUOTING> section
 for more details.
 
 For the most part, each of the above formatting codes takes up as much
@@ -844,7 +844,7 @@ name of the month or weekday in the preferred case representation for
 the locale currently in effect.  Thus in an English-speaking locale,
 the seventh month would be "July" (uppercase first letter, lowercase
 rest); while in a French-speaking locale, it would be "juillet" (all
-lowercase).  See the L<QUOTING> section for ways to control the case
+lowercase).  See the L</QUOTING> section for ways to control the case
 of month/weekday names.
 
 Note that the "C<mm>", "C<m>", and "C<?m>" formats are ambiguous.
@@ -1093,7 +1093,7 @@ limitation.
 
 Eric J. Roode, roode@cpan.org
 
-Copyright (c) 2003-2005 by Eric J. Roode. All Rights Reserved.
+Copyright (c) 2003-2008 by Eric J. Roode. All Rights Reserved.
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
 
@@ -1104,11 +1104,11 @@ message.
 =begin gpg
 
 -----BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.1 (Cygwin)
+Version: GnuPG v1.4.8 (Cygwin)
 
-iD8DBQFDj0C6Y96i4h5M0egRAgX/AJ9iG4sAWgdo9u2ZcY8IJWFErptYsACfV1Ah
-PUuWJvTBkiLmk45tfHnpPKY=
-=Wpkw
+iEYEARECAAYFAkfnzuEACgkQwoSYc5qQVqoEzgCghE/IUvYfWsBex/VmsY5g1ZO7
+YF8AnjZeICFD9vwSSyff/dx5GMMNFLCg
+=3pZM
 -----END PGP SIGNATURE-----
 
 =end gpg

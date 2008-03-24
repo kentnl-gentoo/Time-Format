@@ -76,3 +76,7 @@ Revision history for Perl extension Time::Format.
 1.02  2005 December 1
         - No changes. Had to increment the number because of a PAUSE
           upload problem.
+
+1.03  2008 March 24
+        - Fixed a broken test case.
+        - Added Module::Build support.

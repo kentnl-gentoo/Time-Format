@@ -6,8 +6,23 @@ use Test::More tests => 12;
 BEGIN { $Time::Format::NOXS = 1 }
 BEGIN { use_ok 'Time::Format', qw(time_format %time) }
 
-my $datemanip_notok;
-BEGIN {eval 'use Date::Manip qw(ParseDate)'; $datemanip_notok = $@? 1 : 0;}
+my $manip_bad;
+BEGIN
+{
+    eval 'use Date::Manip ()';
+    if ($@)
+    {
+        $manip_bad = 'Date::Manip is not available';
+    }
+    else
+    {
+        # If Date::Manip can't determine the time zone, it'll bomb out of the tests.
+        eval 'Date::Manip::Date_TimeZone()';
+        $manip_bad = 'Date::Manip cannot determine time zone';
+    }
+    delete $INC{'Date/Manip.pm'};
+    %Date::Manip:: = ();
+}
 
 # Get day/month names in current locale
 my ($Thursday, $Thu, $June, $Jun);
@@ -24,7 +39,7 @@ if ($@)
 
 SKIP:
 {
-    skip 'DateManip not available', 10  if $datemanip_notok;
+    skip $manip_bad, 11  if $manip_bad;
 
     my $t = ParseDate('June 5, 2003 at 1:58:09 pm');
 

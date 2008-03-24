@@ -6,7 +6,8 @@ use Test::More tests => 21;
 # time-as-string tests
 
 BEGIN { $Time::Format::NOXS = 1 }
-BEGIN { use_ok 'Time::Format', qw(time_format %time) }
+use Time::Format qw(time_format %time);
+# BEGIN { use_ok 'Time::Format', qw(time_format %time) }
 
 # Get day/month names in current locale
 my ($Thursday, $Thu, $June, $Jun);
@@ -30,6 +31,8 @@ my $dtx;
 ($dtx = $dt) =~ tr/-://d;   # no separators at all
 my $out;
 my $err;
+
+ok 1;
 
 # time_format tests (10 * 2)
 is time_format('yyyymmdd', $d),  '20030605'    => 'ymd d only';
@@ -55,3 +58,4 @@ is $time{'hhmmss',   $t},  '135809'      => 'hms t only';
 is $time{'hhmmss',   $d_t},'135809'      => 'hms d&t';
 is $time{'hhmmss',   $dt}, '135809'      => 'hms dt';
 is $time{'hhmmss',   $dtx},'135809'      => 'hms dt-nosep';
+

@@ -1,30 +1,33 @@
+Build.PL
 Changes
-Makefile.PL
-MANIFEST
-README
 Format.pm
-Time-Format.ppd
-Time-Format-ppm.tar.gz
-quickref.txt
+MANIFEST
+MANIFEST.SKIP
+META.yml                                 Module meta-data (added by MakeMaker)
+Makefile.PL
+README
+SIGNATURE
 quickref.ps
-t/time.t
-t/strftime.t
-t/manip.t
-t/DateTime.t
+quickref.txt
+t/0-signature.t
 t/DateManip.t
+t/DateTime.t
 t/die.t
 t/doc.t
-t/funcs.t
-t/locale.t
 t/export1.t
 t/export2.t
 t/export3.t
+t/funcs.t
+t/locale.t
+t/manip.t
 t/quot.t
+t/strftime.t
 t/string.t
+t/time.t
 t/xs_DateTime.t
 t/xs_doc.t
 t/xs_funcs.t
 t/xs_locale.t
 t/xs_quot.t
 t/xs_time.t
-META.yml                                 Module meta-data (added by MakeMaker)
+SIGNATURE    Added here by Module::Build

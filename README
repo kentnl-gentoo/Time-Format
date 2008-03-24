@@ -1,4 +1,4 @@
-Time::Format version 1.02
+Time::Format version 1.03
 =========================
 
 Time::Format provides a very easy way to format dates and times.  The
@@ -47,25 +47,24 @@ EXAMPLES
 There are also corresponding functions for each of these hashes, which
 you can use if you prefer (or need) a function-based interface.
 
-
-CHANGES SINCE v1.00
-
-Support added for DateTime objects, DateTime stringifications, and
-Date::Manip strings.
-
-If you find any bugs, or if any behavior of Time::Format surprises
-you, I would be grateful if you could send me an email message about
-it.  Thanks.
-
-
 INSTALLATION
 
-To install this module, do the standard Perl module four-step:
+To install this module, issue the following commands:
 
-   perl Makefile.PL    or    perl Makefile.pl LIB='my/install/path'
+   perl Build.PL
+   perl Build
+   perl Build test
+   perl Build install
+
+If you do not have Module::Build, use the old-style commands:
+
+   perl Makefile.PL
    make
    make test
    make install
+
+If you are running under Windows, you will need to use 'nmake' instead
+of 'make'.
 
 DEPENDENCIES
 
@@ -78,16 +77,21 @@ This module can use these other modules and libraries:
   Time::Format_XS (optional)
   Test::More      (used by the test suite only)
   Time::Local     (used by the test suite only)
+  Module::Signature  (optional) (used by test suite only)
 
 
 COPYRIGHT AND LICENSE
 
 Eric J. Roode, roode@cpan.org
 
-Copyright (c) 2003-2005 by Eric J. Roode. All Rights Reserved.
+Copyright (c) 2003-2008 by Eric J. Roode. All Rights Reserved.
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
 
 To avoid my spam filter, please include "Perl", "module", or this
 module's name in the message's subject line, and/or GPG-sign your
 message.
+
+If you find any bugs, or if any behavior of Time::Format surprises
+you, I would be grateful if you could send me an email message about
+it.  Thanks.
