@@ -1,4 +1,5 @@
 ^Makefile$
+^Makefile.old$
 ^blib/
 ^pm_to_blib
 ^blibdirs
@@ -11,3 +12,4 @@
 \.tar\.gz$
 ^pod.*tmp$
 ^\.cvsignore$
+^cover_db

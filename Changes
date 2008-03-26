@@ -80,3 +80,7 @@ Revision history for Perl extension Time::Format.
 1.03  2008 March 24
         - Fixed a broken test case.
         - Added Module::Build support.
+
+1.04  2008 March 26
+        - Worked around a POSIX bug which would cause hangs under cygwin.
+        - Fixed a couple test cases.

@@ -8,15 +8,14 @@ Time::Format - Easy-to-use date/time formatting.
 
 =head1 VERSION
 
-This documentation describes version 1.03 of Time::Format.pm, March 24, 2008.
+This documentation describes version 1.04 of Time::Format.pm, March 26, 2008.
 
 =cut
 
 use strict;
 package Time::Format;
 use vars qw($VERSION %XSCOMPAT $NOXS);
-
-$VERSION  = '1.03';
+$VERSION  = '1.04';
 
 # This module claims to be compatible with the following versions
 # of Time::Format_XS.
@@ -236,6 +235,7 @@ sub time_manip
 __DATA__
 # The following is only compiled if Time::Format_XS is not available.
 
+use Time::Local;
 
 # Default names for months, days
 my %english_names =
@@ -450,7 +450,7 @@ sub decode_DateTime_object
     my @t = ($dt->hour_12, $dt->time_zone_short_name,
              $dt->second,  $dt->minute, $dt->hour,
              $dt->day,     $dt->month,  $dt->year,
-             $dt->day_of_week);
+             $dt->dow,     $dt->doy,    $dt->is_dst);
     $t[-1] = 0 if $t[-1] == 7;   # Convert 1-7 (Mon-Sun) to 0-6 (Sun-Sat).
 
     return @t;
@@ -466,7 +466,7 @@ sub decode_DateTime_string
                         )?                                     # ymd is optional, but next must not be digit
                       (?:  (?<=\d)  [T_ ]  (?=\d) )?           # separator: T or _ or space, but only if ymd and hms both present
                       (?:                                      # hms is optional
-                         (\d{2}) [:.]? (\d{2}) [:.]? (\d{2})    # hour:minute:second
+                         (\d{2}) [:.]? (\d{2}) [:.]? (\d{2})   # hour:minute:second
                          (?: [,.] \d+)?                        # optional fraction (ignored in this sub)
                       )?   \z
                      }x)
@@ -483,11 +483,21 @@ sub decode_DateTime_string
     $h   ||=    0;
     $min ||=    0;
     $s   ||=    0;
+
+    # Must determine whether it's Daylight Saving Time or not,
+    # so we can work around a bug in POSIX's strftime('%Z').
+    my $temp_time = timelocal($s, $min, $h, $d, $mon-1, $y-1900);
+    my ($wday, $yday, $is_dst);
+    ($s, $min, $h, $d, $mon, $y, $wday, $yday, $is_dst) = localtime($temp_time);
+    $mon++;
+    $y += 1900;
+    # End of stupid POSIX bug workaround
+
     my @t = map {$_+0} ($s,$min,$h,$d,$mon,$y);   # +0 is to force numeric (remove leading zeroes)
     my $h12  = $h == 0? 12
              : $h > 12? $h - 12
              :          $h;
-    push @t, _dow($y, $mon, $d);
+    push @t, _dow($y, $mon, $d), $yday, $is_dst;
     return ($h12, undef, @t);
 }
 
@@ -1091,24 +1101,39 @@ limitation.
 
 =head1 AUTHOR / COPYRIGHT
 
-Eric J. Roode, roode@cpan.org
+Copyright (c) 2003-2008 by Eric J. Roode, ROODE I<-at-> cpan I<-dot-> org
 
-Copyright (c) 2003-2008 by Eric J. Roode. All Rights Reserved.
-This module is free software; you can redistribute it and/or modify it
-under the same terms as Perl itself.
+All rights reserved.
 
 To avoid my spam filter, please include "Perl", "module", or this
 module's name in the message's subject line, and/or GPG-sign your
 message.
+
+This module is copyrighted only to ensure proper attribution of
+authorship and to ensure that it remains available to all.  This
+module is free, open-source software.  This module may be freely used
+for any purpose, commercial, public, or private, provided that proper
+credit is given, and that no more-restrictive license is applied to
+derivative (not dependent) works.
+
+Substantial efforts have been made to ensure that this software meets
+high quality standards; however, no guarantee can be made that there
+are no undiscovered bugs, and no warranty is made as to suitability to
+any given use, including merchantability.  Should this module cause
+your house to burn down, your dog to collapse, your heart-lung machine
+to fail, your spouse to desert you, or George Bush to be re-elected, I
+can offer only my sincere sympathy and apologies, and promise to
+endeavor to improve the software.
+
 
 =begin gpg
 
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.8 (Cygwin)
 
-iEYEARECAAYFAkfnzuEACgkQwoSYc5qQVqoEzgCghE/IUvYfWsBex/VmsY5g1ZO7
-YF8AnjZeICFD9vwSSyff/dx5GMMNFLCg
-=3pZM
+iEYEARECAAYFAkfqu/wACgkQwoSYc5qQVqofywCfbdyzoTckeKzEGvo9+o3ZNkiG
+OXcAn3NxcNKdQJAGp7Yib2aqVzk/609z
+=FggW
 -----END PGP SIGNATURE-----
 
 =end gpg

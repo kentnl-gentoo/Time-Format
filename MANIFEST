@@ -1,9 +1,9 @@
 Build.PL
 Changes
-Format.pm
+lib/Time/Format.pm
 MANIFEST
 MANIFEST.SKIP
-META.yml                                 Module meta-data (added by MakeMaker)
+META.yml
 Makefile.PL
 README
 SIGNATURE

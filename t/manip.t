@@ -17,7 +17,7 @@ BEGIN
     {
         # If Date::Manip can't determine the time zone, it'll bomb out of the tests.
         eval 'Date::Manip::Date_TimeZone()';
-        $manip_bad = 'Date::Manip cannot determine time zone';
+        $manip_bad = 'Date::Manip cannot determine time zone' if $@;
     }
     delete $INC{'Date/Manip.pm'};
     %Date::Manip:: = ();

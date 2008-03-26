@@ -1,5 +1,5 @@
 This file contains message digests of all files listed in MANIFEST,
-signed via the Module::Signature module, version 0.54.
+signed via the Module::Signature module, version 0.55.
 
 To verify the content in this distribution, first make sure you have
 Module::Signature installed, then type:
@@ -14,18 +14,18 @@ not run its Makefile.PL or Build.PL.
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA1
 
-SHA1 be5dfdd2f149d3e41b9b1defc8c409e8f6aa24e6 Build.PL
-SHA1 447ce200464985a35c8fc9b3a491e7d9a34aa3fc Changes
-SHA1 0da6cbb517a4cc3ed08c556a942d27cb938a0151 Format.pm
-SHA1 3671c735cff2ba691e232389103d083963015be9 MANIFEST
-SHA1 356dd9200011d6aa84b903aac2442cca509f3806 MANIFEST.SKIP
-SHA1 58cd3d361befdabafaa3c08b7bad74349d14d328 META.yml
-SHA1 9a4e8f60324b13b25854ab721573c1ac9748b8dc Makefile.PL
-SHA1 ccf4900cb3bb5acf33a82ab8c637d43f57d75d55 README
+SHA1 e488f9178d9407de228867270947a9bc96932eff Build.PL
+SHA1 09d674046b97cb728b865cb42f563d9c86a0067c Changes
+SHA1 52549762ea5699fdce670cfa422ae482be927c68 MANIFEST
+SHA1 214bc5de11eba97f8883e03a8e766fc8ecea063e MANIFEST.SKIP
+SHA1 64abf022811e5611ad73c9a13cd25cadcbd0ea11 META.yml
+SHA1 3f76b125079f722ebe7ccb514fa4b585e961c505 Makefile.PL
+SHA1 d1b75cabce6b8625b4e27092865e2b419d9fb9e9 README
+SHA1 170db6b4400e5aa04c047ab1564373e48a012e59 lib/Time/Format.pm
 SHA1 a2837cfe1005a6e5fd95248f33f6283b24673950 quickref.ps
 SHA1 2d3df18b888ce54592232c9fa4fe59480340c212 quickref.txt
 SHA1 fa5807c950a0d17cf58ffde3f7dd6ab63025de5a t/0-signature.t
-SHA1 afdb4748430d120127a155995033249458001513 t/DateManip.t
+SHA1 53932df986808ff775c4ee8b71447cec1584c679 t/DateManip.t
 SHA1 6094073e00748b2b403138034921adcc9fd6d365 t/DateTime.t
 SHA1 e54c03886f4466bbe803cfbea88226a430f4511d t/die.t
 SHA1 882aed30859d0cb7365ae278aef2d508be229b7e t/doc.t
@@ -34,7 +34,7 @@ SHA1 96054241cdd6d43799569b5dd7efb7ada9964fc2 t/export2.t
 SHA1 c3792783e7a73a9ae93d6f8f9575421b32ef47d9 t/export3.t
 SHA1 97a8edb5882bd782d2929618bfb3090e5b2b3654 t/funcs.t
 SHA1 32e6bb93cb5c4b65c248db7dab0caf23ad4a14f8 t/locale.t
-SHA1 f0cac0b82ed16f5fe5b16b9d6e02fbc4fa868b25 t/manip.t
+SHA1 c7cf931aba1d4c1bce2d89041093654eb707cacf t/manip.t
 SHA1 185ec016a44b3730f7985c9d003c51d750bb00c1 t/quot.t
 SHA1 7b8ec55b5bc1e2ae967b6ff022a7dd8514280fba t/strftime.t
 SHA1 ed09e519af19751ddad6436b86d6ad22dad6e59d t/string.t
@@ -46,9 +46,9 @@ SHA1 0fa482612d660c83874af325e428a896b80f12ac t/xs_locale.t
 SHA1 16c230d45acb4cf65e8a7bae2cfc2c0deb97f9d8 t/xs_quot.t
 SHA1 5e066ed1e85efe6e0d68570b022fc615d0be8ea8 t/xs_time.t
 -----BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.7 (MingW32)
+Version: GnuPG v1.4.8 (Cygwin)
 
-iD8DBQFH59WRwoSYc5qQVqoRAvRqAJ41dLHHILW4WPKtvQgSe6MNftovRQCbBwmt
-7j0wiG5W1rn4VrJcx+iDkfc=
-=Za1D
+iEYEARECAAYFAkfqwFcACgkQwoSYc5qQVqqY9wCgmtnh4Uynclejbu8ZLpSIY4HE
+V4sAn0llTzAT1Gha4t1SNe000K0OUd57
+=S05h
 -----END PGP SIGNATURE-----

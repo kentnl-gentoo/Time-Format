@@ -18,10 +18,8 @@ BEGIN
     {
         # If Date::Manip can't determine the time zone, it'll bomb out of the tests.
         eval 'Date::Manip::Date_TimeZone()';
-        $manip_bad = 'Date::Manip cannot determine time zone';
+        $manip_bad = "Date::Manip cannot determine time zone" if $@;
     }
-    delete $INC{'Date/Manip.pm'};
-    %Date::Manip:: = ();
 }
 
 # Get day/month names in current locale
@@ -41,7 +39,7 @@ SKIP:
 {
     skip $manip_bad, 11  if $manip_bad;
 
-    my $t = ParseDate('June 5, 2003 at 1:58:09 pm');
+    my $t = Date::Manip::ParseDate('June 5, 2003 at 1:58:09 pm');
 
     # time_format tests (5)
     is time_format('yyyymmdd', $t),  '20030605'    => 'mm month';

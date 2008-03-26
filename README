@@ -1,4 +1,4 @@
-Time::Format version 1.03
+Time::Format version 1.04
 =========================
 
 Time::Format provides a very easy way to format dates and times.  The
@@ -70,13 +70,13 @@ DEPENDENCIES
 
 This module can use these other modules and libraries:
 
+  Time::Local
   I18N::Langinfo  (optional)
   POSIX           (optional)
   Time::HiRes     (optional)
   Date::Manip     (optional)
   Time::Format_XS (optional)
   Test::More      (used by the test suite only)
-  Time::Local     (used by the test suite only)
   Module::Signature  (optional) (used by test suite only)
 
 
@@ -85,8 +85,8 @@ COPYRIGHT AND LICENSE
 Eric J. Roode, roode@cpan.org
 
 Copyright (c) 2003-2008 by Eric J. Roode. All Rights Reserved.
-This module is free software; you can redistribute it and/or modify it
-under the same terms as Perl itself.
+You are free to use and redistribute this software; see the full
+copyright notice in the module documentation.
 
 To avoid my spam filter, please include "Perl", "module", or this
 module's name in the message's subject line, and/or GPG-sign your
