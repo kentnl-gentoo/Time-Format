@@ -1,12 +1,12 @@
 Build.PL
 Changes
-lib/Time/Format.pm
 MANIFEST
 MANIFEST.SKIP
 META.yml
 Makefile.PL
 README
 SIGNATURE
+lib/Time/Format.pm
 quickref.ps
 quickref.txt
 t/0-signature.t

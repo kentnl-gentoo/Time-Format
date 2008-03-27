@@ -84,3 +84,6 @@ Revision history for Perl extension Time::Format.
 1.04  2008 March 26
         - Worked around a POSIX bug which would cause hangs under cygwin.
         - Fixed a couple test cases.
+
+1.05  2008 March 27
+        - Fix a typo bug in Makefile.PL

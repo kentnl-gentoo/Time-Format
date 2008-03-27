@@ -2,12 +2,12 @@
 
 use strict;
 use Test::More tests => 21;
+use lib 'blib/lib', 'blib/arch';
 
 # time-as-string tests
 
 BEGIN { $Time::Format::NOXS = 1 }
-use Time::Format qw(time_format %time);
-# BEGIN { use_ok 'Time::Format', qw(time_format %time) }
+BEGIN { use_ok 'Time::Format', qw(time_format %time) }
 
 # Get day/month names in current locale
 my ($Thursday, $Thu, $June, $Jun);
@@ -31,8 +31,6 @@ my $dtx;
 ($dtx = $dt) =~ tr/-://d;   # no separators at all
 my $out;
 my $err;
-
-ok 1;
 
 # time_format tests (10 * 2)
 is time_format('yyyymmdd', $d),  '20030605'    => 'ymd d only';

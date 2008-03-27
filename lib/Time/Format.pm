@@ -8,14 +8,14 @@ Time::Format - Easy-to-use date/time formatting.
 
 =head1 VERSION
 
-This documentation describes version 1.04 of Time::Format.pm, March 26, 2008.
+This documentation describes version 1.05 of Time::Format.pm, March 27, 2008.
 
 =cut
 
 use strict;
 package Time::Format;
 use vars qw($VERSION %XSCOMPAT $NOXS);
-$VERSION  = '1.04';
+$VERSION  = '1.05';
 
 # This module claims to be compatible with the following versions
 # of Time::Format_XS.
@@ -413,7 +413,6 @@ sub _loctime
     # Populate a whole mess o' data elements
     my %th;
     my $m0 = $time_parts[4] - 1;   # zero-based month
-    $tz ||= _have('POSIX')? POSIX::strftime('%Z',@time_parts) : q{};
 
     # NOTE: When adding new codes, be wary of adding any that interfere
     # with the user's ability to use the words "at", "on", or "of" literally.
@@ -477,28 +476,51 @@ sub decode_DateTime_string
     }
 
     my ($y,$mon,$d,$h,$min,$s) = ($1,$2,$3,$4,$5,$6);
-    $y   ||= 1969;
-    $mon ||=   12;
-    $d   ||=   31;
-    $h   ||=    0;
-    $min ||=    0;
-    $s   ||=    0;
+    my ($d_only, $t_only);
+    my ($h12, $tz, $is_dst, $dow);
+    if (!defined $y)
+    {
+        # Time only.  Set date to 1969-12-31.
+        $y   = 1969;
+        $mon =   12;
+        $d   =   31;
+        $h12  = $h == 0? 12
+              : $h > 12? $h - 12
+              :          $h;
+        $is_dst = 0;   # (it's the dead of winter!)
+        $dow = 3;      # 12/31/1969 is Wednesday.
+        $t_only = 1;
+    }
+    if (!defined $h)
+    {
+        $h   =    0;
+        $min =    0;
+        $s   =    0;
+        $d_only = 1;
+    }
 
-    # Must determine whether it's Daylight Saving Time or not,
-    # so we can work around a bug in POSIX's strftime('%Z').
-    my $temp_time = timelocal($s, $min, $h, $d, $mon-1, $y-1900);
-    my ($wday, $yday, $is_dst);
-    ($s, $min, $h, $d, $mon, $y, $wday, $yday, $is_dst) = localtime($temp_time);
-    $mon++;
-    $y += 1900;
-    # End of stupid POSIX bug workaround
+    if (!$t_only)
+    {
+        $h12  = $h == 0? 12
+              : $h > 12? $h - 12
+              :          $h;
 
-    my @t = map {$_+0} ($s,$min,$h,$d,$mon,$y);   # +0 is to force numeric (remove leading zeroes)
-    my $h12  = $h == 0? 12
-             : $h > 12? $h - 12
-             :          $h;
-    push @t, _dow($y, $mon, $d), $yday, $is_dst;
-    return ($h12, undef, @t);
+        # DST?
+        # If year is before 1970, use current year.
+        my $tmp_year = $y > 1969? $y : (localtime)[5]+1900;
+        my $ttime = timelocal(0, 0, 0, $d, $mon, $tmp_year);
+        my @t = localtime $ttime;
+        $is_dst = $t[8];
+        $dow = _dow($y, $mon, $d);
+    }
+
+    # +0 is to force numeric (remove leading zeroes)
+    my @t = map {$_+0} ($s,$min,$h,$d,$mon,$y);
+
+    $tz = POSIX::strftime('%Z', @t, $dow, -1, $is_dst)
+        if _have('POSIX');
+
+    return ($h12, $tz, @t, $dow, -1, $is_dst);
 }
 
 sub decode_epoch
@@ -506,12 +528,13 @@ sub decode_epoch
     my $time = shift;   # Assumed to be an epoch time integer
 
     my @t = localtime $time;
+    my $tz = _have('POSIX')? POSIX::strftime('%Z', @t) : '';
     my $h = $t[2];    # Hour (24), Month index
     $t[4]++;
     $t[5] += 1900;
     my $h12 = $h>12? $h-12 : ($h || 12);
 
-    return ($h12, undef, @t);
+    return ($h12, $tz, @t);
 }
 
 #  $int = dow ($year, $month, $day);
@@ -1088,11 +1111,11 @@ limitation.
 
 =head1 REQUIREMENTS
 
+ Time::Local
  I18N::Langinfo, if you want non-English locales to work.
  POSIX, if you choose to use %strftime or want the C<tz> format to work.
  Time::HiRes, if you want the C<mmm> and C<uuuuuu> time formats to work.
  Date::Manip, if you choose to use %manip.
- Time::Local (only needed to run the 'make test' suite).
 
  Time::Format_XS is optional but will make C<%time> and C<time_format>
      much faster.  The version of Time::Format_XS installed must match
@@ -1131,9 +1154,9 @@ endeavor to improve the software.
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.8 (Cygwin)
 
-iEYEARECAAYFAkfqu/wACgkQwoSYc5qQVqofywCfbdyzoTckeKzEGvo9+o3ZNkiG
-OXcAn3NxcNKdQJAGp7Yib2aqVzk/609z
-=FggW
+iEYEARECAAYFAkfr6jAACgkQwoSYc5qQVqqjAQCgi0JrBTsjp1HrG4ZaSD6ciVHo
+Jn8AnRTIQ3bj8U2GcfmmC05fS/qczwZx
+=0RML
 -----END PGP SIGNATURE-----
 
 =end gpg

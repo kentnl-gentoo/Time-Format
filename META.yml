@@ -1,17 +1,17 @@
 ---
 name: Time-Format
-version: 1.04
+version: 1.05
 author:
   - 'Eric J. Roode <roode@cpan.org>'
 abstract: Easy-to-use date/time formatting.
 license: unrestricted
 build_requires:
-  Test::More: 0.10
+  Test::Simple: 0.40
   Time::Local: 1.07
 provides:
   Time::Format:
     file: lib/Time/Format.pm
-    version: 1.04
+    version: 1.05
 generated_by: Module::Build version 0.2807
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.2.html
