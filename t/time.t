@@ -94,24 +94,27 @@ SKIP:
 
 
     # Make sure 'm' guessing works reasonably well (18)
-    is $time{'yyyymm',$t},    '200306'    => 'm test: year';
-    is $time{'yymm',$t},      '0306'      => 'm test: year2';
-    is $time{'mmdd',$t},      '0605'      => 'm test: day';
-    is $time{'yyyy/m',$t},    '2003/6'    => 'm test: year/';
-    is $time{'yy/m',$t},      '03/6'      => 'm test: year2/';
-    is $time{'m/d',$t},       '6/5'       => 'm test: /day';
-    is $time{'m/dd',$t},      '6/05'      => 'm test: /Day';
-    is $time{'?d/mm',$t},     ' 5/06'     => 'm test: d/m';
-    is $time{'?m/yyyy',$t},   ' 6/2003'   => 'm test: m/y';
-    is $time{'m/yy',$t},      '6/03'      => 'm test: m/y2';
-    is $time{'yyyy mon',$t},  '2003 jun'  => 'm test: year mon';
-    is $time{'hhmm',$t},      '1358'      => 'm test: hour';
-    is $time{'mmss',$t},      '5809'      => 'm test: sec';
-    is $time{'hh:mm',$t},     '13:58'     => 'm test: hour:';
-    is $time{'?m:ss',$t},     '58:09'     => 'm test: :sec';
-    is $time{'H:mm',$t},      '1:58'      => 'm test: Hour:';
-    is $time{'HH:mm',$t},     '01:58'     => 'm test: hour12:';
-    is $time{'?H:m',$t},      ' 1:58'     => 'm test: Hour12:';
+    is $time{'yyyymm',$t},    '200306'      => 'm test: year';
+    is $time{'yymm',$t},      '0306'        => 'm test: year2';
+    is $time{'mmdd',$t},      '0605'        => 'm test: day';
+    is $time{'yyyy/m',$t},    '2003/6'      => 'm test: year/';
+    is $time{'yy/m',$t},      '03/6'        => 'm test: year2/';
+    is $time{'m/d',$t},       '6/5'         => 'm test: /day';
+    is $time{'m/dd',$t},      '6/05'        => 'm test: /Day';
+    is $time{'?d/mm',$t},     ' 5/06'       => 'm test: d/m';
+    is $time{'?m/yyyy',$t},   ' 6/2003'     => 'm test: m/y';
+    is $time{'m/yy',$t},      '6/03'        => 'm test: m/y2';
+
+    # This test was broken until v1.06 (2008/03/28): was hardcoded to "jun".
+    is $time{'yyyy mon',$t},  "2003 \L$Mon" => 'm test: year mon';
+
+    is $time{'hhmm',$t},      '1358'        => 'm test: hour';
+    is $time{'mmss',$t},      '5809'        => 'm test: sec';
+    is $time{'hh:mm',$t},     '13:58'       => 'm test: hour:';
+    is $time{'?m:ss',$t},     '58:09'       => 'm test: :sec';
+    is $time{'H:mm',$t},      '1:58'        => 'm test: Hour:';
+    is $time{'HH:mm',$t},     '01:58'       => 'm test: hour12:';
+    is $time{'?H:m',$t},      ' 1:58'       => 'm test: Hour12:';
 
     # Current time value (1)
     # localtime seems always to return English day/month

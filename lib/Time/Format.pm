@@ -8,14 +8,14 @@ Time::Format - Easy-to-use date/time formatting.
 
 =head1 VERSION
 
-This documentation describes version 1.05 of Time::Format.pm, March 27, 2008.
+This documentation describes version 1.06 of Time::Format.pm, March 28, 2008.
 
 =cut
 
 use strict;
 package Time::Format;
 use vars qw($VERSION %XSCOMPAT $NOXS);
-$VERSION  = '1.05';
+$VERSION  = '1.06';
 
 # This module claims to be compatible with the following versions
 # of Time::Format_XS.
@@ -1154,9 +1154,9 @@ endeavor to improve the software.
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.8 (Cygwin)
 
-iEYEARECAAYFAkfr6jAACgkQwoSYc5qQVqqjAQCgi0JrBTsjp1HrG4ZaSD6ciVHo
-Jn8AnRTIQ3bj8U2GcfmmC05fS/qczwZx
-=0RML
+iEYEARECAAYFAkftSmEACgkQwoSYc5qQVqokuQCgqHnoes/fQ4oYAYXX3sOar5oF
+XYwAn1l2vcHpnL1kvfKvl82/YE3kBwOr
+=Uerr
 -----END PGP SIGNATURE-----
 
 =end gpg

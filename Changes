@@ -87,3 +87,6 @@ Revision history for Perl extension Time::Format.
 
 1.05  2008 March 27
         - Fix a typo bug in Makefile.PL
+
+1.06  2008 March 28
+        - Fix a broken test case in time.t; failed for non-English locales.
