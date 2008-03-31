@@ -44,8 +44,8 @@ SKIP:
     SKIP:
     {
         skip 'No French locale', 2 unless $fr_ok;
-        is $time{'month',$t},   'juin'      => 'Mois français';
-        is $time{'weekday',$t}, 'jeudi'     => 'Jour de la semaine français';
+        is $time{'month',$t},   'juin'      => 'Mois franÃ§ais';
+        is $time{'weekday',$t}, 'jeudi'     => 'Jour de la semaine franÃ§ais';
     }
 
     my $de_ok = setlocale($lc_time, 'de_DE');
@@ -60,7 +60,7 @@ SKIP:
     SKIP:
     {
         skip 'No Spanish locale', 2 unless $es_ok;
-        is $time{'month',$t},   'junio'      => 'Mes español';
-        is $time{'weekday',$t}, 'jueves'     => 'Día español de la semana';
+        is $time{'month',$t},   'junio'      => 'Mes espaÃ±ol';
+        is $time{'weekday',$t}, 'jueves'     => 'DÃ­a espaÃ±ol de la semana';
     }
 }

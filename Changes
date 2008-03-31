@@ -90,3 +90,7 @@ Revision history for Perl extension Time::Format.
 
 1.06  2008 March 28
         - Fix a broken test case in time.t; failed for non-English locales.
+
+1.07  2008 March 31
+        - More test-case changes, to work with older perls.
+        - Many thanks to Slaven Rezic and the rest of the tireless CPAN testers!

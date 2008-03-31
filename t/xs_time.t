@@ -12,7 +12,7 @@ my ($Weekday, $Day, $Month, $Mon);
 eval
 {
     require I18N::Langinfo;
-    I18N::Langinfo->import qw(langinfo DAY_5 ABDAY_5 MON_6 ABMON_6);
+    I18N::Langinfo->import(qw(langinfo DAY_5 ABDAY_5 MON_6 ABMON_6));
     ($Weekday, $Day, $Month, $Mon) = map langinfo($_), (DAY_5(), ABDAY_5(), MON_6(), ABMON_6());
 };
 if ($@)

@@ -8,14 +8,14 @@ Time::Format - Easy-to-use date/time formatting.
 
 =head1 VERSION
 
-This documentation describes version 1.06 of Time::Format.pm, March 28, 2008.
+This documentation describes version 1.07 of Time::Format.pm, March 31, 2008.
 
 =cut
 
 use strict;
 package Time::Format;
 use vars qw($VERSION %XSCOMPAT $NOXS);
-$VERSION  = '1.06';
+$VERSION  = '1.07';
 
 # This module claims to be compatible with the following versions
 # of Time::Format_XS.
@@ -264,7 +264,7 @@ sub setup_locale
 
     eval {
         require I18N::Langinfo;
-        I18N::Langinfo->import qw(langinfo);
+        I18N::Langinfo->import(qw(langinfo));
         @Month = map langinfo($_),   I18N::Langinfo::MON_1(),    I18N::Langinfo::MON_2(),    I18N::Langinfo::MON_3(),
                                      I18N::Langinfo::MON_4(),    I18N::Langinfo::MON_5(),    I18N::Langinfo::MON_6(),
                                      I18N::Langinfo::MON_7(),    I18N::Langinfo::MON_8(),    I18N::Langinfo::MON_9(),

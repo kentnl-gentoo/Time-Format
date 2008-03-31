@@ -18,7 +18,7 @@ my ($Tuesday, $December, $Thursday, $Thu, $June, $Jun);
 eval
 {
     require I18N::Langinfo;
-    I18N::Langinfo->import qw(langinfo DAY_3 MON_12 DAY_5 ABDAY_5 MON_6 ABMON_6);
+    I18N::Langinfo->import(qw(langinfo DAY_3 MON_12 DAY_5 ABDAY_5 MON_6 ABMON_6));
     ($Tuesday, $December, $Thursday, $Thu, $June, $Jun) = map langinfo($_), (DAY_3(), MON_12(), DAY_5(), ABDAY_5(), MON_6(), ABMON_6());
 };
 if ($@)
