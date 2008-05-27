@@ -1,23 +1,26 @@
 #!/usr/bin/perl
-# $File: //member/autrijus/Module-Signature/t/0-signature.t $ $Author: eroode $
-# $Revision: 1.1 $ $Change: 1871 $ $DateTime: 2002/11/03 19:22:02 $
 
 use strict;
-use Test::More tests => 1;
+print "1..1\n";
 
-SKIP: {
-    if (!eval { require Socket; Socket::inet_aton('pgp.mit.edu') }) {
-	skip("Cannot connect to the keyserver", 1);
-    }
-    elsif (!eval { require Module::Signature; 1 }) {
-	diag("Next time around, consider install Module::Signature,\n".
-	     "so you can verify the integrity of this distribution.\n");
-	skip("Module::Signature not installed", 1);
-    }
-    else {
-	ok(Module::Signature::verify() == Module::Signature::SIGNATURE_OK()
-	    => "Valid signature" );
-    }
+if (!$ENV{TEST_SIGNATURE}) {
+    print "ok 1 # skip Set the environment variable",
+        " TEST_SIGNATURE to enable this test\n";
 }
-
-__END__
+elsif (!-s 'SIGNATURE') {
+    print "ok 1 # skip No signature file found\n";
+}
+elsif (!eval { require Module::Signature; 1 }) {
+    print "ok 1 # skip ",
+        "Next time around, consider install Module::Signature, ",
+            "so you can verify the integrity of this distribution.\n";
+}
+elsif (!eval { require Socket; Socket::inet_aton('pgp.mit.edu') }) {
+    print "ok 1 # skip ",
+        "Cannot connect to the keyserver\n";
+}
+else {
+    (Module::Signature::verify() == Module::Signature::SIGNATURE_OK())
+        or print "not ";
+    print "ok 1 # Valid signature\n";
+}

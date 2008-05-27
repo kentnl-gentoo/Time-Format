@@ -94,3 +94,7 @@ Revision history for Perl extension Time::Format.
 1.07  2008 March 31
         - More test-case changes, to work with older perls.
         - Many thanks to Slaven Rezic and the rest of the tireless CPAN testers!
+
+1.08  2008 May 27
+        - Reset $@ at certain places, so as to work with older (broken) perls.
+        - Again, thanks to Slaven Rezic.

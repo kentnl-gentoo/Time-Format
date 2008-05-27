@@ -10,6 +10,7 @@ lib/Time/Format.pm
 quickref.ps
 quickref.txt
 t/0-signature.t
+t/1-load.t
 t/DateManip.t
 t/DateTime.t
 t/die.t

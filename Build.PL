@@ -1,6 +1,13 @@
 use strict;
 use warnings;
-use Module::Build;
+
+eval {require Module::Build};
+if ($@)
+{
+    warn "Module::Build is required for Build.PL\n";
+    exit 0;
+}
+
 
 my $builder = Module::Build->new(
     module_name         => 'Time::Format',
@@ -9,8 +16,11 @@ my $builder = Module::Build->new(
     dist_version_from   => 'lib/Time/Format.pm',
     build_requires => {
                        'Test::Simple' => '0.40',
-                       'Time::Local'  => '1.07',
                       },
+    requires =>
+    {
+        'Time::Local'    => '1.07',
+    },
     sign => 1,
     add_to_cleanup      => [ 'Time-Format-*' ],
 );

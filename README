@@ -1,4 +1,4 @@
-Time::Format version 1.07
+Time::Format version 1.08
 =========================
 
 Time::Format provides a very easy way to format dates and times.  The
@@ -7,8 +7,8 @@ inside strings as well as in ordinary expressions.  The formatting
 codes used are meant to be easy to remember, use, and read.  They
 follow a simple, consistent pattern.  If I've done my job right, once
 you learn the codes, you should never have to refer to the
-documentation again.  A quick-reference page is included, just in
-case.  ;-)
+documentation again.
+A quick-reference page is included, just in case.  ;-)
 
 Time::Format can also format DateTime objects, and strings created
 with Date::Manip.
@@ -22,6 +22,7 @@ weekday and month names in a language appropriate for your locale.
 A companion module, Time::Format_XS, is also available; if it is
 installed, Time::Format will detect and use it, which will result in a
 significant speed improvement.
+
 
 EXAMPLES
 
@@ -47,6 +48,7 @@ EXAMPLES
 There are also corresponding functions for each of these hashes, which
 you can use if you prefer (or need) a function-based interface.
 
+
 INSTALLATION
 
 To install this module, issue the following commands:
@@ -65,6 +67,7 @@ If you do not have Module::Build, use the old-style commands:
 
 If you are running under Windows, you will need to use 'nmake' instead
 of 'make'.
+
 
 DEPENDENCIES
 
@@ -85,13 +88,9 @@ COPYRIGHT AND LICENSE
 Eric J. Roode, roode @ cpan . org
 
 Copyright (c) 2003-2008 by Eric J. Roode. All Rights Reserved.
-You are free to use and redistribute this software; see the full
-copyright notice in the module documentation.
+This module is free software; See the copyright notice in the
+module source code for full details.
 
 To avoid my spam filter, please include "Perl", "module", or this
 module's name in the message's subject line, and/or GPG-sign your
 message.
-
-If you find any bugs, or if any behavior of Time::Format surprises
-you, I would be grateful if you could send me an email message about
-it.  Thanks.

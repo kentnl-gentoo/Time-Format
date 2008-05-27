@@ -8,18 +8,17 @@ Time::Format - Easy-to-use date/time formatting.
 
 =head1 VERSION
 
-This documentation describes version 1.07 of Time::Format.pm, March 31, 2008.
+This documentation describes version 1.08 of Time::Format.pm, May 27, 2008.
 
 =cut
 
 use strict;
 package Time::Format;
-use vars qw($VERSION %XSCOMPAT $NOXS);
-$VERSION  = '1.07';
+$Time::Format::VERSION  = '1.08';
 
 # This module claims to be compatible with the following versions
 # of Time::Format_XS.
-%XSCOMPAT = map {$_ => 1} qw(1.01 1.02);
+%Time::Format::XSCOMPAT = map {$_ => 1} qw(1.01 1.02);
 
 sub _croak
 {
@@ -31,7 +30,7 @@ sub _croak
 # XS module, or if we need to load and compile the perl-only
 # subroutines (which are stored in __DATA__).
 my $load_perlonly = 0;
-$load_perlonly = 1  if defined $NOXS  &&  $NOXS;
+$load_perlonly = 1  if defined $Time::Format::NOXS  &&  $Time::Format::NOXS;
 
 if (!$load_perlonly)
 {
@@ -46,11 +45,11 @@ if (!$load_perlonly)
     {
         # Check that we're compatible with them (backwards compatibility)
         # or they're compatible with us (forwards compatibility).
-        unless ($XSCOMPAT{$Time::Format_XS::VERSION}
-            ||  $Time::Format_XS::PLCOMPAT{$VERSION})
+        unless ($Time::Format::XSCOMPAT{$Time::Format_XS::VERSION}
+            ||  $Time::Format_XS::PLCOMPAT{$Time::Format::VERSION})
         {
             warn "Your Time::Format_XS version ($Time::Format_XS::VERSION) "
-               . "is not compatible with Time::Format version ($VERSION).\n"
+               . "is not compatible with Time::Format version ($Time::Format::VERSION).\n"
                . "Using Perl-only functions.\n";
             $load_perlonly = 1;
         }
@@ -187,6 +186,7 @@ use subs qw(
         $incmod =~ s!::!/!g;
         return $have{$module} = 1  if exists $INC{"$incmod.pm"};
 
+        $@ = '';
         eval "require $module";
         return $have{$module} = $@? 0 : 1;
     }
@@ -284,6 +284,7 @@ sub setup_locale
         @Weekday = @{ $english_names{Weekday} };
         @Mon     = map substr($_,0,3), @Month;
         @Day     = map substr($_,0,3), @Weekday;
+        $@ = '';
     }
 
     # Store in %names, setting proper case
@@ -1152,11 +1153,11 @@ endeavor to improve the software.
 =begin gpg
 
 -----BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.8 (Cygwin)
+Version: GnuPG v1.4.9 (Cygwin)
 
-iEYEARECAAYFAkftSmEACgkQwoSYc5qQVqokuQCgqHnoes/fQ4oYAYXX3sOar5oF
-XYwAn1l2vcHpnL1kvfKvl82/YE3kBwOr
-=Uerr
+iEYEARECAAYFAkg8SOMACgkQwoSYc5qQVqqUjQCeLWdDxATY38WCXatChkQKunRc
+t4cAoJUCIuRqcNjQW5csAWy40bwfq2lm
+=BIzQ
 -----END PGP SIGNATURE-----
 
 =end gpg
