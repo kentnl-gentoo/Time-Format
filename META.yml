@@ -1,6 +1,6 @@
 ---
 name: Time-Format
-version: 1.08
+version: 1.09
 author:
   - 'Eric J. Roode <roode@cpan.org>'
 abstract: Easy-to-use date/time formatting.
@@ -12,8 +12,8 @@ build_requires:
 provides:
   Time::Format:
     file: lib/Time/Format.pm
-    version: 1.08
-generated_by: Module::Build version 0.280801
+    version: 1.09
+generated_by: Module::Build version 0.2805
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.2.html
   version: 1.2

@@ -8,13 +8,13 @@ Time::Format - Easy-to-use date/time formatting.
 
 =head1 VERSION
 
-This documentation describes version 1.08 of Time::Format.pm, May 27, 2008.
+This documentation describes version 1.09 of Time::Format.pm, May 27, 2008.
 
 =cut
 
 use strict;
 package Time::Format;
-$Time::Format::VERSION  = '1.08';
+$Time::Format::VERSION  = '1.09';
 
 # This module claims to be compatible with the following versions
 # of Time::Format_XS.
@@ -509,7 +509,7 @@ sub decode_DateTime_string
         # DST?
         # If year is before 1970, use current year.
         my $tmp_year = $y > 1969? $y : (localtime)[5]+1900;
-        my $ttime = timelocal(0, 0, 0, $d, $mon, $tmp_year);
+        my $ttime = timelocal(0, 0, 0, $d, $mon-1, $tmp_year);
         my @t = localtime $ttime;
         $is_dst = $t[8];
         $dow = _dow($y, $mon, $d);
@@ -1155,9 +1155,9 @@ endeavor to improve the software.
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.9 (Cygwin)
 
-iEYEARECAAYFAkg8SOMACgkQwoSYc5qQVqqUjQCeLWdDxATY38WCXatChkQKunRc
-t4cAoJUCIuRqcNjQW5csAWy40bwfq2lm
-=BIzQ
+iEYEARECAAYFAkg8pPsACgkQwoSYc5qQVqp6hwCfY30CUt46NH9J5UZCeeedakrZ
+w70An1ZcbQzHCZOBAbbATpLJW2bvFTWC
+=GbWA
 -----END PGP SIGNATURE-----
 
 =end gpg

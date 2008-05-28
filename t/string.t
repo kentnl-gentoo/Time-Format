@@ -1,7 +1,7 @@
 #!/perl -I..
 
 use strict;
-use Test::More tests => 21;
+use Test::More tests => 27;
 use lib 'blib/lib', 'blib/arch';
 
 # time-as-string tests
@@ -57,3 +57,15 @@ is $time{'hhmmss',   $d_t},'135809'      => 'hms d&t';
 is $time{'hhmmss',   $dt}, '135809'      => 'hms dt';
 is $time{'hhmmss',   $dtx},'135809'      => 'hms dt-nosep';
 
+# Reported bug case:
+eval { $out = time_format('yyyy.mm.dd', '2007.12.31'); };
+is $@, '', 'December bug I: no error';
+is $out, '2007.12.31' => 'December bug I';
+
+eval { $out = time_format('yyyy.mm.dd', '2000.01.01'); };
+is $@, '', 'December bug II: no error';
+is $out, '2000.01.01' => 'December bug II';
+
+eval { $out = time_format('yyyy.mm.dd', '1968.01.01'); };
+is $@, '', 'December bug III: no error';
+is $out, '1968.01.01' => 'December bug III';

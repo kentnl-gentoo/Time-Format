@@ -1,4 +1,4 @@
-Revision history for Perl extension Time::Format.
+>Revision history for Perl extension Time::Format.
 
 0.01  2003 June 8
 	- First version
@@ -82,19 +82,27 @@ Revision history for Perl extension Time::Format.
         - Added Module::Build support.
 
 1.04  2008 March 26
-        - Worked around a POSIX bug which would cause hangs under cygwin.
+        - Worked around a POSIX bug which would cause hangs under
+          cygwin.
         - Fixed a couple test cases.
 
 1.05  2008 March 27
         - Fix a typo bug in Makefile.PL
 
 1.06  2008 March 28
-        - Fix a broken test case in time.t; failed for non-English locales.
+        - Fix a broken test case in time.t; failed for non-English
+          locales.
 
 1.07  2008 March 31
-        - More test-case changes, to work with older perls.
-        - Many thanks to Slaven Rezic and the rest of the tireless CPAN testers!
+        - More test-case changes, to work with older perls.  Many
+          thanks to Slaven Rezic and the rest of the tireless CPAN
+          testers!
 
 1.08  2008 May 27
-        - Reset $@ at certain places, so as to work with older (broken) perls.
-        - Again, thanks to Slaven Rezic.
+        - Reset $@ at certain places, so as to work with older
+          (broken) perls.  Again, thanks to Slaven Rezic.
+
+1.09  2008 May 27
+        - Bug fix: generated error if second argument to time_format
+          was a string and was in December.  Thanks to Bokor Béla for
+          spotting this one.
