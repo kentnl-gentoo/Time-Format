@@ -21,6 +21,7 @@ t/export3.t
 t/funcs.t
 t/locale.t
 t/manip.t
+t/past.t
 t/quot.t
 t/strftime.t
 t/string.t

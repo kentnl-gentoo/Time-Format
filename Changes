@@ -106,3 +106,8 @@
         - Bug fix: generated error if second argument to time_format
           was a string and was in December.  Thanks to Bokor Béla for
           spotting this one.
+
+1.10  2009 June 17
+        - Bug fix: Did not trim leading zero off the am/pm hour (H
+          code) if the argument was a DateTime.  Thanks to Coke Coleda
+          for spotting this.

@@ -8,13 +8,13 @@ Time::Format - Easy-to-use date/time formatting.
 
 =head1 VERSION
 
-This documentation describes version 1.09 of Time::Format.pm, May 27, 2008.
+This documentation describes version 1.10 of Time::Format.pm, June 17, 2009.
 
 =cut
 
 use strict;
 package Time::Format;
-$Time::Format::VERSION  = '1.09';
+$Time::Format::VERSION  = '1.10';
 
 # This module claims to be compatible with the following versions
 # of Time::Format_XS.
@@ -517,6 +517,7 @@ sub decode_DateTime_string
 
     # +0 is to force numeric (remove leading zeroes)
     my @t = map {$_+0} ($s,$min,$h,$d,$mon,$y);
+    $h12 += 0;
 
     $tz = POSIX::strftime('%Z', @t, $dow, -1, $is_dst)
         if _have('POSIX');
@@ -1125,7 +1126,7 @@ limitation.
 
 =head1 AUTHOR / COPYRIGHT
 
-Copyright (c) 2003-2008 by Eric J. Roode, ROODE I<-at-> cpan I<-dot-> org
+Copyright (c) 2003-2009 by Eric J. Roode, ROODE I<-at-> cpan I<-dot-> org
 
 All rights reserved.
 
@@ -1155,9 +1156,9 @@ endeavor to improve the software.
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.9 (Cygwin)
 
-iEYEARECAAYFAkg8pPsACgkQwoSYc5qQVqp6hwCfY30CUt46NH9J5UZCeeedakrZ
-w70An1ZcbQzHCZOBAbbATpLJW2bvFTWC
-=GbWA
+iEYEARECAAYFAko5NuoACgkQwoSYc5qQVqrFsgCfcAswyqznrx5Dam0ejkSo6S8M
+DnMAoI/AIqkl970qS7PYBw4zh+eu8bsx
+=L+eA
 -----END PGP SIGNATURE-----
 
 =end gpg
