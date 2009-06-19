@@ -3,8 +3,10 @@
 
 use strict;
 use Test::More;
-use DateTime::Format::ISO8601;
 use Time::Format;
+
+my $have_module = eval { require 'DateTime::Format::ISO8601'; 1; };
+
 
 # Input string, output string
 my @tuples = (
@@ -13,17 +15,25 @@ my @tuples = (
              );
 
 # The above array contains all of the tests this unit will run.
-plan tests => 2 * scalar(@tuples);
+my $num_tests = 2 * scalar(@tuples);
+plan tests => $num_tests;
 
-my $time_format = 'Month d, yyyy @ H:mm';
-
-my $index = 0;
-foreach my $pair (@tuples)
+SKIP:
 {
-    my ($input, $expected) = @$pair;
-    my $dt = DateTime::Format::ISO8601->parse_datetime($input);
+    skip 'DateTime::Format::ISO8601 required for this test', $num_tests
+        unless $have_module;
 
-    is $time{$time_format,       $dt}, $expected, "Test case $index (hash)";
-    is time_format($time_format, $dt), $expected, "Test case $index (func)";
-    ++$index;
+    my $time_format = 'Month d, yyyy @ H:mm';
+
+    my $index = 0;
+    foreach my $pair (@tuples)
+    {
+        my ($input, $expected) = @$pair;
+        my $dt = DateTime::Format::ISO8601->parse_datetime($input);
+
+        is $time{$time_format,       $dt}, $expected, "Test case $index (hash)";
+        is time_format($time_format, $dt), $expected, "Test case $index (func)";
+        ++$index;
+    }
 }
+

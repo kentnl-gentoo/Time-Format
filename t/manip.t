@@ -8,16 +8,15 @@ BEGIN { use_ok 'Time::Format', qw(%manip) }
 my $manip_bad;
 BEGIN
 {
-    eval 'use Date::Manip ()';
-    if ($@)
+    unless (eval 'use Date::Manip (); 1')
     {
         $manip_bad = 'Date::Manip is not available';
     }
     else
     {
         # If Date::Manip can't determine the time zone, it'll bomb out of the tests.
-        eval 'Date::Manip::Date_TimeZone()';
-        $manip_bad = 'Date::Manip cannot determine time zone' if $@;
+        $manip_bad = 'Date::Manip cannot determine time zone'
+            unless eval 'Date::Manip::Date_TimeZone(); 1';
     }
     delete $INC{'Date/Manip.pm'};
     %Date::Manip:: = ();

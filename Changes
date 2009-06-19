@@ -111,3 +111,7 @@
         - Bug fix: Did not trim leading zero off the am/pm hour (H
           code) if the argument was a DateTime.  Thanks to Coke Coleda
           for spotting this.
+
+1.10  2009 June 18
+        - Fix error in the new test (past.t) for v1.10!
+        - Rearrange eval's throughout test code to rely on $@ less.

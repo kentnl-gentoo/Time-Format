@@ -9,28 +9,27 @@ BEGIN { use_ok 'Time::Format', qw(time_format %time) }
 my $manip_bad;
 BEGIN
 {
-    eval 'use Date::Manip ()';
-    if ($@)
+    if (eval 'use Date::Manip (); 1')
     {
-        $manip_bad = 'Date::Manip is not available';
+        # If Date::Manip can't determine the time zone, it'll bomb out of the tests.
+        $manip_bad = 'Date::Manip cannot determine time zone'
+            unless eval 'Date::Manip::Date_TimeZone(); 1';
     }
     else
     {
-        # If Date::Manip can't determine the time zone, it'll bomb out of the tests.
-        eval 'Date::Manip::Date_TimeZone()';
-        $manip_bad = "Date::Manip cannot determine time zone" if $@;
+        $manip_bad = 'Date::Manip is not available';
     }
 }
 
 # Get day/month names in current locale
 my ($Thursday, $Thu, $June, $Jun);
-eval
-{
-    require I18N::Langinfo;
-    I18N::Langinfo->import(qw(langinfo DAY_3 MON_12 DAY_5 ABDAY_5 MON_6 ABMON_6));
-    ($Thursday, $Thu, $June, $Jun) = map ucfirst lc langinfo($_), (DAY_5(), ABDAY_5(), MON_6(), ABMON_6());
-};
-if ($@)
+unless (eval
+    {
+        require I18N::Langinfo;
+        I18N::Langinfo->import(qw(langinfo DAY_3 MON_12 DAY_5 ABDAY_5 MON_6 ABMON_6));
+        ($Thursday, $Thu, $June, $Jun) = map ucfirst lc langinfo($_), (DAY_5(), ABDAY_5(), MON_6(), ABMON_6());
+        1;
+    })
 {
     ($Thursday, $Thu, $June, $Jun) = qw(Thursday Thu June Jun);
 }

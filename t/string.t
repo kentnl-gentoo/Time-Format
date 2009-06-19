@@ -11,13 +11,13 @@ BEGIN { use_ok 'Time::Format', qw(time_format %time) }
 
 # Get day/month names in current locale
 my ($Thursday, $Thu, $June, $Jun);
-eval
-{
-    require I18N::Langinfo;
-    I18N::Langinfo->import(qw(langinfo DAY_3 MON_12 DAY_5 ABDAY_5 MON_6 ABMON_6));
-    ($Thursday, $Thu, $June, $Jun) = map ucfirst lc langinfo($_), (DAY_5(), ABDAY_5(), MON_6(), ABMON_6());
-};
-if ($@)
+unless (eval
+    {
+        require I18N::Langinfo;
+        I18N::Langinfo->import(qw(langinfo DAY_3 MON_12 DAY_5 ABDAY_5 MON_6 ABMON_6));
+        ($Thursday, $Thu, $June, $Jun) = map ucfirst lc langinfo($_), (DAY_5(), ABDAY_5(), MON_6(), ABMON_6());
+        1;
+    })
 {
     ($Thursday, $Thu, $June, $Jun) = qw(Thursday Thu June Jun);
 }

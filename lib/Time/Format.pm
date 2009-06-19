@@ -8,13 +8,13 @@ Time::Format - Easy-to-use date/time formatting.
 
 =head1 VERSION
 
-This documentation describes version 1.10 of Time::Format.pm, June 17, 2009.
+This documentation describes version 1.11 of Time::Format.pm, June 18, 2009.
 
 =cut
 
 use strict;
 package Time::Format;
-$Time::Format::VERSION  = '1.10';
+$Time::Format::VERSION  = '1.11';
 
 # This module claims to be compatible with the following versions
 # of Time::Format_XS.
@@ -262,7 +262,7 @@ sub setup_locale
 
     my (@Month, @Mon, @Weekday, @Day);
 
-    eval {
+    unless (eval {
         require I18N::Langinfo;
         I18N::Langinfo->import(qw(langinfo));
         @Month = map langinfo($_),   I18N::Langinfo::MON_1(),    I18N::Langinfo::MON_2(),    I18N::Langinfo::MON_3(),
@@ -277,9 +277,10 @@ sub setup_locale
             I18N::Langinfo::DAY_4(), I18N::Langinfo::DAY_5(),    I18N::Langinfo::DAY_6(),    I18N::Langinfo::DAY_7();
         @Day     = map langinfo($_), I18N::Langinfo::ABDAY_1(),  I18N::Langinfo::ABDAY_2(),  I18N::Langinfo::ABDAY_3(),
           I18N::Langinfo::ABDAY_4(), I18N::Langinfo::ABDAY_5(),  I18N::Langinfo::ABDAY_6(),  I18N::Langinfo::ABDAY_7();
-    };
-    if ($@)    # Internationalization didn't work for some reason; go with English.
-    {
+        1;
+        }
+           )
+    {    # Internationalization didn't work for some reason; go with English.
         @Month   = @{ $english_names{Month} };
         @Weekday = @{ $english_names{Weekday} };
         @Mon     = map substr($_,0,3), @Month;
@@ -336,7 +337,7 @@ sub _classify_time
     # Stringified DateTime object
     # Except we make it more flexible by allowing the date OR the time to be specfied
     # This will also match Date::Manip strings, and many ISO-8601 strings.
-    elsif ($timeval =~ m{\A(   (?!>\d{6,8}\z)                # string must not consist of only 6 or 8 digits.
+    elsif ($timeval =~ m{\A(   (?!\d{6,8}\z)                 # string must not consist of only 6 or 8 digits.
                           (?:
                             \d{4} [-/.]? \d{2} [-/.]? \d{2}  # year-month-day
                           )?                                 # ymd is optional
@@ -542,7 +543,7 @@ sub decode_epoch
 #  $int = dow ($year, $month, $day);
 #
 # Returns the day of the week (0=Sunday .. 6=Saturday).  Uses Zeller's
-# congruence, so it is't subject to the unix 2038 limitation.
+# congruence, so it isn't subject to the unix 2038 limitation.
 #
 #--->     $int = dow ($year, $month, $day);
 sub _dow
@@ -565,7 +566,7 @@ sub _dow
 # The heart of the module.  Didja ever see so many wicked regexes in a row?
 
 my %disam;    # Disambiguator for 'm' format.
-$disam{$_} = "{on}" foreach qw/yy d dd ?d/;           # If year or day is nearby, it's 'month'
+$disam{$_} = "{on}" foreach qw/yy d dd ?d/;                # If year or day is nearby, it's 'month'
 $disam{$_} = "{in}" foreach qw/h hh ?h H HH ?H s ss ?s/;   # If hour or second is nearby, it's 'minute'
 sub time_format_perlonly
 {
@@ -1156,9 +1157,9 @@ endeavor to improve the software.
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.9 (Cygwin)
 
-iEYEARECAAYFAko5NuoACgkQwoSYc5qQVqrFsgCfcAswyqznrx5Dam0ejkSo6S8M
-DnMAoI/AIqkl970qS7PYBw4zh+eu8bsx
-=L+eA
+iEYEARECAAYFAko6+8sACgkQwoSYc5qQVqpHSgCggtDbvzExQFNs4b1QoF/t9TaU
+BNYAn0C5LsPiJqCk4lzf8Jfn/4t+Zw7+
+=C+Tp
 -----END PGP SIGNATURE-----
 
 =end gpg

@@ -10,9 +10,9 @@ BEGIN { use_ok 'Time::Format', '%time' }
 
 my $posix_bad;
 my $lc_time;
-BEGIN {
-    eval 'require POSIX';
-    $posix_bad= $@? 1 : 0;
+BEGIN
+{
+    $posix_bad = eval ('require POSIX; 1')? 0 : 1;
     unless ($posix_bad)
     {
         $lc_time = POSIX::LC_TIME();
@@ -22,7 +22,7 @@ BEGIN {
     %POSIX:: = ();
 }
 my $tl_notok;
-BEGIN { eval 'use Time::Local'; $tl_notok = $@? 1 : 0 }
+BEGIN {$tl_notok = eval ('use Time::Local; 1')? 0 : 1}
 
 SKIP:
 {

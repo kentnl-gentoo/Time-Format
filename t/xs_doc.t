@@ -8,20 +8,20 @@ use Test::More tests => 18;
 
 BEGIN { use_ok 'Time::Format', qw(:all) }
 my $tl_notok;
-BEGIN { eval 'use Time::Local'; $tl_notok = $@? 1 : 0 }
+BEGIN {$tl_notok = eval ('use Time::Local; 1')? 0 : 1}
 
 # Were all variables imported? (1)
 is ref tied %time,     'Time::Format'   =>  '%time imported';
 
 # Get day/month names in current locale
 my ($Tuesday, $December, $Thursday, $Thu, $June, $Jun);
-eval
-{
-    require I18N::Langinfo;
-    I18N::Langinfo->import(qw(langinfo DAY_3 MON_12 DAY_5 ABDAY_5 MON_6 ABMON_6));
-    ($Tuesday, $December, $Thursday, $Thu, $June, $Jun) = map langinfo($_), (DAY_3(), MON_12(), DAY_5(), ABDAY_5(), MON_6(), ABMON_6());
-};
-if ($@)
+unless (eval
+    {
+        require I18N::Langinfo;
+        I18N::Langinfo->import(qw(langinfo DAY_3 MON_12 DAY_5 ABDAY_5 MON_6 ABMON_6));
+        ($Tuesday, $December, $Thursday, $Thu, $June, $Jun) = map langinfo($_), (DAY_3(), MON_12(), DAY_5(), ABDAY_5(), MON_6(), ABMON_6());
+        1;
+    })
 {
     ($Tuesday, $December, $Thursday, $Thu, $June, $Jun) = qw(Tuesday December Thursday Thu June Jun);
 }

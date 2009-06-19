@@ -7,13 +7,15 @@ BEGIN { $Time::Format::NOXS = 1 }
 BEGIN { use_ok 'Time::Format', qw(%strftime) }
 my $posix_bad;
 BEGIN {
-    eval 'use POSIX ()';
-    $posix_bad = $@? 1 : 0;
+    $posix_bad = eval ('use POSIX (); 1')? 0 : 1;
     delete $INC{'POSIX.pm'};
     %POSIX:: = ();
 }
 my $tl_bad;
-BEGIN { eval 'use Time::Local'; $tl_bad = $@? 1 : 0 }
+BEGIN
+{
+    $tl_bad = eval ('use Time::Local; 1')? 0 : 1
+}
 
 SKIP:
 {

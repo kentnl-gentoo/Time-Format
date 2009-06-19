@@ -6,24 +6,21 @@ use Test::More tests => 18;
 BEGIN { $Time::Format::NOXS = 1 }
 BEGIN { use_ok 'Time::Format', qw(%time time_format time_strftime time_manip) }
 my $tl_notok;
-BEGIN { eval 'use Time::Local'; $tl_notok = $@? 1 : 0 }
+BEGIN { $tl_notok = eval ('use Time::Local; 1')? 0 : 1 }
 my $posix_bad;
 BEGIN {
-    eval 'use POSIX ()';
-    $posix_bad = $@? 1 : 0;
+    $posix_bad = eval ('use POSIX (); 1')? 0 : 1;
     delete $INC{'POSIX.pm'};
     %POSIX:: = ();
 }
 my $manip_bad;
 my $manip_notz;
 BEGIN {
-    eval 'use Date::Manip ()';
-    $manip_bad = $@? 1 : 0;
+    $manip_bad = eval('use Date::Manip (); 1')? 0 : 1;
     unless ($manip_bad)
     {
         # If Date::Manip can't determine the time zone, it'll bomb out of the tests.
-        eval 'Date::Manip::Date_TimeZone ()';
-        $manip_notz = $@? 1 : 0;
+        $manip_notz = eval ('Date::Manip::Date_TimeZone (); 1')? 0 : 1;
     }
     delete $INC{'Date/Manip.pm'};
     %Date::Manip:: = ();
@@ -31,13 +28,13 @@ BEGIN {
 
 # Get day/month names in current locale
 my ($Thursday, $Thu, $June, $Jun);
-eval
-{
-    require I18N::Langinfo;
-    I18N::Langinfo->import(qw(langinfo DAY_3 MON_12 DAY_5 ABDAY_5 MON_6 ABMON_6));
-    ($Thursday, $Thu, $June, $Jun) = map ucfirst lc langinfo($_), (DAY_5(), ABDAY_5(), MON_6(), ABMON_6());
-};
-if ($@)
+unless (eval
+    {
+        require I18N::Langinfo;
+        I18N::Langinfo->import(qw(langinfo DAY_3 MON_12 DAY_5 ABDAY_5 MON_6 ABMON_6));
+        ($Thursday, $Thu, $June, $Jun) = map ucfirst lc langinfo($_), (DAY_5(), ABDAY_5(), MON_6(), ABMON_6());
+        1;
+    })
 {
     ($Thursday, $Thu, $June, $Jun) = qw(Thursday Thu June Jun);
 }

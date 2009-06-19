@@ -15,6 +15,7 @@ t/DateManip.t
 t/DateTime.t
 t/die.t
 t/doc.t
+t/epoch.t
 t/export1.t
 t/export2.t
 t/export3.t
@@ -32,4 +33,3 @@ t/xs_funcs.t
 t/xs_locale.t
 t/xs_quot.t
 t/xs_time.t
-SIGNATURE    Added here by Module::Build

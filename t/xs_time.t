@@ -5,17 +5,17 @@ use Test::More tests => 78;
 
 BEGIN { use_ok 'Time::Format', qw(%time) }
 my $tl_notok;
-BEGIN { eval 'use Time::Local'; $tl_notok = $@? 1 : 0 }
+BEGIN {$tl_notok = eval ('use Time::Local; 1')? 0 : 1}
 
 # Get day/month names in current locale
 my ($Weekday, $Day, $Month, $Mon);
-eval
-{
-    require I18N::Langinfo;
-    I18N::Langinfo->import(qw(langinfo DAY_5 ABDAY_5 MON_6 ABMON_6));
-    ($Weekday, $Day, $Month, $Mon) = map langinfo($_), (DAY_5(), ABDAY_5(), MON_6(), ABMON_6());
-};
-if ($@)
+unless (eval
+    {
+        require I18N::Langinfo;
+        I18N::Langinfo->import(qw(langinfo DAY_5 ABDAY_5 MON_6 ABMON_6));
+        ($Weekday, $Day, $Month, $Mon) = map langinfo($_), (DAY_5(), ABDAY_5(), MON_6(), ABMON_6());
+        1;
+    })
 {
     ($Weekday, $Day, $Month, $Mon) = qw(Thursday Thu June Jun);
 }
