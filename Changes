@@ -112,6 +112,23 @@
           code) if the argument was a DateTime.  Thanks to Coke Coleda
           for spotting this.
 
-1.10  2009 June 18
+1.11  2009 June 18
         - Fix error in the new test (past.t) for v1.10!
         - Rearrange eval's throughout test code to rely on $@ less.
+
+1.12  2012 September 27
+        - Fix CPAN RT bug 44167/54990: Negative milliseconds/microseconds.
+          This was a boneheaded mistake I should have fixed years ago.
+          Many thanks to Karl Moens for reporting the error, and for a patch.
+
+        - Fix CPAN RT bug 47229: Build.PL dependencies.
+          Unfortunately, I cannot fix Makefile.PL, since ExtUtils::MakeMaker
+          has no concept of "recommended" or "optional" modules.
+          Thanks to Jens Rehsack for the suggestion.
+
+        - Fix CPAN RT bug 55630: ISO-8601 Z (Zulu, UTC) marker not supported.
+          Thanks to Will Coleda for pointing this out.
+
+        - Fix CPAN RT bug 76705/76707 (maybe): month out of range.
+          I can't reproduce this bug, but I made a change to the time parsing
+          that might fix it.  Thanks to Todd Bezenek for reporting the problem.

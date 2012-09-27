@@ -9,8 +9,11 @@
 ^Time-Format-[\d.]+/
 ^Time-Format\.ppd
 \bCVS\b
+^.git
+project-readme
 ~$
 \.tar\.gz$
 ^pod.*tmp$
 ^\.cvsignore$
 ^cover_db
+^MYMETA

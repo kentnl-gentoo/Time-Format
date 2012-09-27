@@ -2,6 +2,7 @@ Build.PL
 Changes
 MANIFEST
 MANIFEST.SKIP
+META.json
 META.yml
 Makefile.PL
 README
@@ -22,6 +23,7 @@ t/export3.t
 t/funcs.t
 t/locale.t
 t/manip.t
+t/msec.t
 t/past.t
 t/quot.t
 t/strftime.t
@@ -33,3 +35,4 @@ t/xs_funcs.t
 t/xs_locale.t
 t/xs_quot.t
 t/xs_time.t
+SIGNATURE    Added here by Module::Build
