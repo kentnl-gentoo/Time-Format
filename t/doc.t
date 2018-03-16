@@ -9,19 +9,6 @@ BEGIN { $Time::Format::NOXS = 1 }
 BEGIN { use_ok 'Time::Format', qw(:all) }
 my $tl_notok;
 BEGIN { $tl_notok = eval('use Time::Local; 1')? 0 : 1 }
-my $dm_notok;
-my $dm_notz;
-BEGIN
-{
-    $dm_notok = eval('use Date::Manip (); 1')? 0 : 1;
-    unless ($dm_notok)
-    {
-        # If Date::Manip can't determine the time zone, it'll bomb out of the tests.
-        $dm_notz = eval('Date::Manip::Date_TimeZone (); 1')? 0 : 1;
-    }
-    delete $INC{'Date/Manip.pm'};
-    %Date::Manip:: = ();
-}
 
 # Were all variables imported? (3)
 is ref tied %time,     'Time::Format'   =>  '%time imported';
@@ -83,8 +70,6 @@ SKIP:
     # manip tests (3)
     SKIP:
     {
-        skip 'Date::Manip not available',             3  if $dm_notok;
-        skip 'Date::Manip cannot determine timezone', 3  if $dm_notz;
         is $manip{'%m/%d/%Y',"epoch $t"},                       '06/05/2003'    => 'Example 13';
         is $manip{'%m/%d/%Y','first monday in November 2000'},  '11/06/2000'    => 'Example 14';
         is qq[$time{'yyyymmdd',$manip{'%s',"epoch $t"}}],       '20030605'      => 'Example 15';

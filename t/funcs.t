@@ -13,18 +13,6 @@ BEGIN {
     delete $INC{'POSIX.pm'};
     %POSIX:: = ();
 }
-my $manip_bad;
-my $manip_notz;
-BEGIN {
-    $manip_bad = eval('use Date::Manip (); 1')? 0 : 1;
-    unless ($manip_bad)
-    {
-        # If Date::Manip can't determine the time zone, it'll bomb out of the tests.
-        $manip_notz = eval ('Date::Manip::Date_TimeZone (); 1')? 0 : 1;
-    }
-    delete $INC{'Date/Manip.pm'};
-    %Date::Manip:: = ();
-}
 
 # Get day/month names in current locale
 my ($Thursday, $Thu, $June, $Jun);
@@ -71,8 +59,6 @@ SKIP:
     # time_manip tests (6)
     SKIP:
     {
-        skip 'Date::Manip not available',             6 if $manip_bad;
-        skip 'Date::Manip cannot determine timezone', 6 if $manip_notz;
         my $m = 'first thursday in june 2003';
         is time_manip('%Y',$m),      '2003'      => 'year';
         is time_manip('%d',$m),      '05'        => 'day of month';
