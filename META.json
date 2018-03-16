@@ -29,7 +29,6 @@
             "Date::Manip" : 0,
             "DateTime" : 0,
             "I18N::Langinfo" : 0,
-            "Module::Signature" : 0,
             "POSIX" : 0,
             "Time::HiRes" : 0
          },

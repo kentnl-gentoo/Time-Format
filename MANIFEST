@@ -6,11 +6,9 @@ META.json
 META.yml
 Makefile.PL
 README
-SIGNATURE
 lib/Time/Format.pm
 quickref.ps
 quickref.txt
-t/0-signature.t
 t/1-load.t
 t/DateManip.t
 t/DateTime.t
@@ -35,4 +33,3 @@ t/xs_funcs.t
 t/xs_locale.t
 t/xs_quot.t
 t/xs_time.t
-SIGNATURE    Added here by Module::Build

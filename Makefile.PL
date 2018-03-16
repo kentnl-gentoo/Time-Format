@@ -13,5 +13,4 @@ WriteMakefile (
     ($] >= 5.005 ?    ## Add these new keywords supported since 5.005
       (ABSTRACT_FROM => 'lib/Time/Format.pm', # retrieve abstract from module
        AUTHOR     => 'Eric Roode <roode@cpan.org>') : ()),
-    (MM->can('signature_target')? (SIGN => 1) : ()),
 );
